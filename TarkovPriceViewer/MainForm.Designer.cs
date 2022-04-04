@@ -215,7 +215,7 @@ namespace TarkovPriceChecker
             this.ShowOverlay_Button.TabStop = false;
             this.ShowOverlay_Button.Text = "F9";
             this.ShowOverlay_Button.UseVisualStyleBackColor = true;
-            this.ShowOverlay_Button.Click += new System.EventHandler(this.Overlay_Button_Click);
+            this.ShowOverlay_Button.Click += new System.EventHandler(this.OverlayButtonClick);
             // 
             // ShowOverlay_Desc
             // 
@@ -246,7 +246,7 @@ namespace TarkovPriceChecker
             this.CloseOverlayWhenMouseMoved.TabStop = false;
             this.CloseOverlayWhenMouseMoved.Text = "Close Overlay When Mouse Moved";
             this.CloseOverlayWhenMouseMoved.UseVisualStyleBackColor = true;
-            this.CloseOverlayWhenMouseMoved.CheckedChanged += new System.EventHandler(this.CloseOverlayWhenMouseMoved_CheckedChanged);
+            this.CloseOverlayWhenMouseMoved.CheckedChanged += new System.EventHandler(this.CloseOverlayWhenMouseMovedCheckedChanged);
             // 
             // TransParent_Bar
             // 
@@ -257,7 +257,7 @@ namespace TarkovPriceChecker
             this.TransParent_Bar.TabIndex = 3;
             this.TransParent_Bar.TabStop = false;
             this.TransParent_Bar.Value = 80;
-            this.TransParent_Bar.Scroll += new System.EventHandler(this.TransParent_Bar_Scroll);
+            this.TransParent_Bar.Scroll += new System.EventHandler(this.TransParentBarScroll);
             // 
             // HideOverlay_Desc2
             // 
@@ -289,7 +289,7 @@ namespace TarkovPriceChecker
             this.HideOverlay_Button.TabStop = false;
             this.HideOverlay_Button.Text = "F10";
             this.HideOverlay_Button.UseVisualStyleBackColor = true;
-            this.HideOverlay_Button.Click += new System.EventHandler(this.Overlay_Button_Click);
+            this.HideOverlay_Button.Click += new System.EventHandler(this.OverlayButtonClick);
             // 
             // HideOverlay_Desc
             // 
@@ -321,7 +321,7 @@ namespace TarkovPriceChecker
             this.Github.TabStop = false;
             this.Github.Text = "Github";
             this.Github.UseVisualStyleBackColor = true;
-            this.Github.Click += new System.EventHandler(this.Github_Click);
+            this.Github.Click += new System.EventHandler(this.GithubClick);
             // 
             // TarkovMarket
             // 
@@ -332,7 +332,7 @@ namespace TarkovPriceChecker
             this.TarkovMarket.TabStop = false;
             this.TarkovMarket.Text = "Tarkov Market";
             this.TarkovMarket.UseVisualStyleBackColor = true;
-            this.TarkovMarket.Click += new System.EventHandler(this.TarkovMarket_Click);
+            this.TarkovMarket.Click += new System.EventHandler(this.TarkovMarketClick);
             // 
             // TarkovWiki
             // 
@@ -343,7 +343,7 @@ namespace TarkovPriceChecker
             this.TarkovWiki.TabStop = false;
             this.TarkovWiki.Text = "Tarkov Wiki";
             this.TarkovWiki.UseVisualStyleBackColor = true;
-            this.TarkovWiki.Click += new System.EventHandler(this.TarkovWiki_Click);
+            this.TarkovWiki.Click += new System.EventHandler(this.TarkovWikiClick);
             // 
             // panel4
             // 
@@ -388,7 +388,7 @@ namespace TarkovPriceChecker
             this.MinimizetoTrayWhenStartup.TabStop = false;
             this.MinimizetoTrayWhenStartup.Text = "Minimize to Tray When Startup";
             this.MinimizetoTrayWhenStartup.UseVisualStyleBackColor = true;
-            this.MinimizetoTrayWhenStartup.CheckedChanged += new System.EventHandler(this.MinimizetoTrayWhenStartup_CheckedChanged);
+            this.MinimizetoTrayWhenStartup.CheckedChanged += new System.EventHandler(this.MinimizetoTrayWhenStartupCheckedChanged);
             // 
             // Version
             // 
@@ -479,7 +479,7 @@ namespace TarkovPriceChecker
             this.CompareOverlay_Button.TabStop = false;
             this.CompareOverlay_Button.Text = "F8";
             this.CompareOverlay_Button.UseVisualStyleBackColor = true;
-            this.CompareOverlay_Button.Click += new System.EventHandler(this.Overlay_Button_Click);
+            this.CompareOverlay_Button.Click += new System.EventHandler(this.OverlayButtonClick);
             // 
             // CompareOverlay_Desc2
             // 
@@ -562,7 +562,7 @@ namespace TarkovPriceChecker
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "TarkovPriceViewer";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainFormFormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.TrayMenu.ResumeLayout(false);
             this.panel1.ResumeLayout(false);

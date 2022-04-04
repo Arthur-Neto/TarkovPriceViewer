@@ -589,10 +589,17 @@ namespace TarkovPriceChecker
                 {
                     if (item.LastFetch == null || (DateTime.Now - item.LastFetch).TotalHours >= 1)
                     {
-                        using var wc = new TPVWebClient();
                         var doc = new HtmlAgilityPack.HtmlDocument();
-                        Debug.WriteLine(Program.TarkovMarketLink + item.MarketAddress);
-                        doc.LoadHtml(wc.DownloadString(Program.TarkovMarketLink + item.MarketAddress));
+
+                        using var httpClient = new HttpClient();
+                        using (var response = httpClient.GetAsync($"{Program.TarkovMarketLink}{item.MarketAddress}").ConfigureAwait(false).GetAwaiter().GetResult())
+                        {
+                            using var content = response.Content;
+                            var json = content.ReadAsStringAsync().Result;
+
+                            doc.LoadHtml(json);
+                        }
+
                         var node_tm = doc.DocumentNode.SelectSingleNode("//div[@class='market-data']");
                         HtmlAgilityPack.HtmlNode? sub_node_tm = null;
                         HtmlAgilityPack.HtmlNode? sub_node_tm2 = null;
@@ -683,13 +690,22 @@ namespace TarkovPriceChecker
                                 Debug.WriteLine(Program.WikiLink + item.WikiAddress);
                                 try
                                 {
-                                    doc.LoadHtml(wc.DownloadString(Program.WikiLink + item.WikiAddress));
+                                    using var response = httpClient.GetAsync($"{Program.WikiLink}{item.WikiAddress}").ConfigureAwait(false).GetAwaiter().GetResult();
+                                    using var content = response.Content;
+                                    var json = content.ReadAsStringAsync().Result;
+
+                                    doc.LoadHtml(json);
                                 }
-                                catch (WebException ex) when (ex.Status == WebExceptionStatus.ProtocolError)
+                                catch (Exception ex)
                                 {
                                     Debug.WriteLine(ex.Message);
                                     Debug.WriteLine(Program.WikiLink + item.NameDisplay2.Replace(" ", "_"));
-                                    doc.LoadHtml(wc.DownloadString(Program.WikiLink + item.NameDisplay2.Replace(" ", "_")));
+
+                                    using var response = httpClient.GetAsync($"{Program.WikiLink}{ item.NameDisplay2.Replace(" ", "_")}").ConfigureAwait(false).GetAwaiter().GetResult();
+                                    using var content = response.Content;
+                                    var json = content.ReadAsStringAsync().Result;
+
+                                    doc.LoadHtml(json);
                                 }
                                 node_tm = doc.DocumentNode.SelectSingleNode("//div[@class='mw-parser-output']");
                                 if (node_tm != null)
@@ -882,7 +898,7 @@ namespace TarkovPriceChecker
             Show();
         }
 
-        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void MainFormFormClosing(object sender, FormClosingEventArgs e)
         {
             if (e.CloseReason == CloseReason.UserClosing) //must be checked
             {
@@ -892,27 +908,42 @@ namespace TarkovPriceChecker
             }
         }
 
-        private void MinimizetoTrayWhenStartup_CheckedChanged(object sender, EventArgs e)
+        private void MinimizetoTrayWhenStartupCheckedChanged(object sender, EventArgs e)
         {
             Program.Settings["MinimizetoTrayWhenStartup"] = (sender as CheckBox).Checked.ToString();
         }
 
         private void Tarkov_Official_Click(object sender, EventArgs e)
         {
-            Process.Start(Program.OfficialLink);
+            var psi = new ProcessStartInfo
+            {
+                FileName = Program.OfficialLink,
+                UseShellExecute = true
+            };
+            Process.Start(psi);
         }
 
-        private void TarkovWiki_Click(object sender, EventArgs e)
+        private void TarkovWikiClick(object sender, EventArgs e)
         {
-            Process.Start(Program.WikiLink);
+            var psi = new ProcessStartInfo
+            {
+                FileName = Program.WikiLink,
+                UseShellExecute = true
+            };
+            Process.Start(psi);
         }
 
-        private void TarkovMarket_Click(object sender, EventArgs e)
+        private void TarkovMarketClick(object sender, EventArgs e)
         {
-            Process.Start(Program.TarkovMarketLink);
+            var psi = new ProcessStartInfo
+            {
+                FileName = Program.TarkovMarketLink,
+                UseShellExecute = true
+            };
+            Process.Start(psi);
         }
 
-        private void CloseOverlayWhenMouseMoved_CheckedChanged(object sender, EventArgs e)
+        private void CloseOverlayWhenMouseMovedCheckedChanged(object sender, EventArgs e)
         {
             Program.Settings["CloseOverlayWhenMouseMoved"] = (sender as CheckBox).Checked.ToString();
             if ((sender as CheckBox).Checked)
@@ -937,7 +968,7 @@ namespace TarkovPriceChecker
             }
         }
 
-        private void Overlay_Button_Click(object sender, EventArgs e)
+        private void OverlayButtonClick(object sender, EventArgs e)
         {
             _pressKeyControl = (sender as Control);
             var selected = 0;
@@ -960,7 +991,7 @@ namespace TarkovPriceChecker
             }
         }
 
-        private void TransParent_Bar_Scroll(object sender, EventArgs e)
+        private void TransParentBarScroll(object sender, EventArgs e)
         {
             var tb = (sender as TrackBar);
             Program.Settings["Overlay_Transparent"] = tb.Value.ToString();
@@ -968,9 +999,14 @@ namespace TarkovPriceChecker
             _overlayInfo.ChangeTransparent(tb.Value);
         }
 
-        private void Github_Click(object sender, EventArgs e)
+        private void GithubClick(object sender, EventArgs e)
         {
-            Process.Start(Program.GithubLink);
+            var psi = new ProcessStartInfo
+            {
+                FileName = Program.GithubLink,
+                UseShellExecute = true
+            };
+            Process.Start(psi);
         }
 
         private void CheckUpdate_Click(object sender, EventArgs e)
@@ -983,8 +1019,13 @@ namespace TarkovPriceChecker
         {
             try
             {
-                using var wc = new TPVWebClient();
-                var check = wc.DownloadString(Program.CheckUpdateLink);
+                var check = string.Empty;
+                using var httpClient = new HttpClient();
+                using (var response = httpClient.GetAsync($"{Program.CheckUpdateLink}").ConfigureAwait(false).GetAwaiter().GetResult())
+                {
+                    using var content = response.Content;
+                    check = content.ReadAsStringAsync().Result;
+                }
                 if (!check.Equals(""))
                 {
                     var sp = check.Split('\n')[0];
