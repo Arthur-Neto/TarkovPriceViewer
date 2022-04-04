@@ -11,48 +11,51 @@ namespace TarkovPriceChecker
     {
         [DllImport("user32.dll", SetLastError = true)]
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
         [DllImport("user32.dll")]
         private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-        private static readonly int GWL_EXSTYLE = -20;
-        private static readonly int WS_EX_TOOLWINDOW = 0x00000080;
-        private static readonly int WS_EX_LAYERED = 0x80000;
-        private static readonly int WS_EX_TRANSPARENT = 0x20;
-        private static int compare_size = 0;
-        private static bool isinfoform = true;
-        private static bool ismoving = false;
-        private static int x, y;
+
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_TOOLWINDOW = 0x00000080;
+        private const int WS_EX_LAYERED = 0x80000;
+        private const int WS_EX_TRANSPARENT = 0x20;
+        private static int _compareSize = 0;
+        private static bool _isInfoForm = true;
+        private static bool _isMoving = false;
+        private static int _x, _y;
 
         private readonly object _lock = new object();
 
         public Overlay(bool _isinfoform)
         {
             InitializeComponent();
-            isinfoform = _isinfoform;
+
+            _isInfoForm = _isinfoform;
             TopMost = true;
             var style = GetWindowLong(Handle, GWL_EXSTYLE);
-            if (isinfoform)
+            if (_isInfoForm)
             {
-                Opacity = int.Parse(Program.settings["Overlay_Transparent"]) * 0.01;
+                Opacity = int.Parse(Program.Settings["Overlay_Transparent"]) * 0.01;
                 SetWindowLong(Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT);
             }
             else
             {
                 SetWindowLong(Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TOOLWINDOW);
             }
-            settingFormPos();
-            initializeCompareData();
-            initializeBallistics();
+            SettingFormPos();
+            InitializeCompareData();
+            InitializeBallistics();
             iteminfo_panel.Visible = false;
             itemcompare_panel.Visible = false;
         }
 
-        public void settingFormPos()
+        public void SettingFormPos()
         {
             Location = new Point(0, 0);
             Size = new Size(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
         }
 
-        public void initializeCompareData()
+        public void InitializeCompareData()
         {
             ItemCompareGrid.ColumnCount = 7;
             ItemCompareGrid.Columns[0].Name = "Name";
@@ -64,11 +67,11 @@ namespace TarkovPriceChecker
             ItemCompareGrid.Columns[6].Name = "LL";
             ItemCompareGrid.Visible = false;
             ItemCompareGrid.ClearSelection();
-            ItemCompareGrid.SortCompare += new DataGridViewSortCompareEventHandler(ItemCompareGrid_SortCompare);
+            ItemCompareGrid.SortCompare += new DataGridViewSortCompareEventHandler(ItemCompareGridSortCompare);
             ResizeGrid(ItemCompareGrid);
         }
 
-        public void initializeBallistics()
+        public void InitializeBallistics()
         {
             iteminfo_ball.ColumnCount = 9;
             iteminfo_ball.Columns[0].Name = "Type";
@@ -85,15 +88,15 @@ namespace TarkovPriceChecker
             ResizeGrid(iteminfo_ball);
         }
 
-        private void ItemCompareGrid_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
+        private void ItemCompareGridSortCompare(object sender, DataGridViewSortCompareEventArgs e)
         {
-            if (e.Column.Index == 0 || e.Column.Index == 5 || e.Column.Index == 6)
+            if (e.Column.Index is 0 or 5 or 6)
             {
                 return;
             }
 
-            int.TryParse(string.Join("", e.CellValue1.ToString().Replace(",", "").Split(Program.splitcur)), out var s1);
-            int.TryParse(string.Join("", e.CellValue2.ToString().Replace(",", "").Split(Program.splitcur)), out var s2);
+            int.TryParse(string.Join("", e.CellValue1.ToString().Replace(",", "").Split(Program.SplitCur)), out var s1);
+            int.TryParse(string.Join("", e.CellValue2.ToString().Replace(",", "").Split(Program.SplitCur)), out var s2);
             e.SortResult = s1.CompareTo(s2);
             e.Handled = true;
         }
@@ -145,48 +148,48 @@ namespace TarkovPriceChecker
                     {
                         if (item == null || item.MarketAddress == null)
                         {
-                            iteminfo_text.Text = Program.notfound;
+                            iteminfo_text.Text = Program.NotFound;
                         }
                         else if (item.PriceLast == null)
                         {
-                            iteminfo_text.Text = Program.noflea;
+                            iteminfo_text.Text = Program.NoFlea;
                         }
                         else
                         {
                             var sb = new StringBuilder();
                             sb.Append(string.Format("Name : {0}\n\n", item.IsName2 ? item.NameDisplay2 : item.NameDisplay));
-                            if (Convert.ToBoolean(Program.settings["Show_Last_Price"]))
+                            if (Convert.ToBoolean(Program.Settings["Show_Last_Price"]))
                             {
                                 sb.Append(string.Format("Last Price : {0} ({1})\n", item.PriceLast, item.LastUpdate));
                             }
-                            if (Convert.ToBoolean(Program.settings["Show_Day_Price"]) && item.PriceDay != null)
+                            if (Convert.ToBoolean(Program.Settings["Show_Day_Price"]) && item.PriceDay != null)
                             {
                                 sb.Append(string.Format("Day Price : {0}\n", item.PriceDay));
                             }
-                            if (Convert.ToBoolean(Program.settings["Show_Week_Price"]) && item.PriceWeek != null)
+                            if (Convert.ToBoolean(Program.Settings["Show_Week_Price"]) && item.PriceWeek != null)
                             {
                                 sb.Append(string.Format("Week Price : {0}\n", item.PriceWeek));
                             }
-                            if (Convert.ToBoolean(Program.settings["Sell_to_Trader"]) && item.SellToTrader != null)
+                            if (Convert.ToBoolean(Program.Settings["Sell_to_Trader"]) && item.SellToTrader != null)
                             {
                                 sb.Append(string.Format("\nSell to Trader : {0}", item.SellToTrader));
                                 sb.Append(string.Format("\nSell to Trader Price : {0}\n", item.SellToTraderPrice));
                             }
-                            if (Convert.ToBoolean(Program.settings["Buy_From_Trader"]) && item.BuyFromTrader != null)
+                            if (Convert.ToBoolean(Program.Settings["Buy_From_Trader"]) && item.BuyFromTrader != null)
                             {
                                 sb.Append(string.Format("\nBuy From Trader : {0}", item.BuyFromTrader));
                                 sb.Append(string.Format("\nBuy From Trader Price : {0}\n", item.BuyFromTraderPrice.Replace(" ", "").Replace(@"~", @" ≈")));
                             }
-                            if (Convert.ToBoolean(Program.settings["Needs"]) && item.Needs != null)
+                            if (Convert.ToBoolean(Program.Settings["Needs"]) && item.Needs != null)
                             {
                                 sb.Append(string.Format("\nNeeds :\n{0}\n", item.Needs));
                             }
-                            if (Convert.ToBoolean(Program.settings["Barters_and_Crafts"]) && item.Bartersandcrafts != null)
+                            if (Convert.ToBoolean(Program.Settings["Barters_and_Crafts"]) && item.Bartersandcrafts != null)
                             {
                                 sb.Append(string.Format("\nBarters & Crafts :\n{0}\n", item.Bartersandcrafts));
                             }
                             iteminfo_text.Text = sb.ToString().Trim();
-                            setTextColors(item);
+                            SetTextColors(item);
                             if (item.Ballistic != null)
                             {
                                 foreach (var b in item.Ballistic.Calibarlist)
@@ -230,13 +233,13 @@ namespace TarkovPriceChecker
                         }
                         if (temp == null)
                         {
-                            if (--compare_size > 0)
+                            if (--_compareSize > 0)
                             {
-                                itemcompare_text.Text = string.Format("{0} Left : {1}", Program.loading, compare_size);
+                                itemcompare_text.Text = string.Format("{0} Left : {1}", Program.Loading, _compareSize);
                             }
                             else
                             {
-                                itemcompare_text.Text = string.Format("{0}", Program.presscomparekey);
+                                itemcompare_text.Text = string.Format("{0}", Program.PressCompareKey);
                             }
                         }
                     }
@@ -247,7 +250,7 @@ namespace TarkovPriceChecker
 
         public DataGridViewRow CheckItemExist(Item item)
         {
-            DataGridViewRow value = null;
+            DataGridViewRow? value = null;
             foreach (DataGridViewRow r in ItemCompareGrid.Rows)
             {
                 if ((item.IsName2 ? item.NameDisplay2 : item.NameDisplay).Equals(r.Cells[0].Value))
@@ -259,16 +262,16 @@ namespace TarkovPriceChecker
             return value;
         }
 
-        public void setTextColors(Item item)
+        public void SetTextColors(Item item)
         {
-            setPriceColor();
-            setInraidColor();
-            setCraftColor(item);
+            SetPriceColor();
+            SetInraidColor();
+            SetCraftColor(item);
         }
 
-        public void setPriceColor()
+        public void SetPriceColor()
         {
-            var mc = Program.money_filter.Matches(iteminfo_text.Text);
+            var mc = Program.MoneyRegex.Matches(iteminfo_text.Text);
             foreach (Match m in mc)
             {
                 iteminfo_text.Select(m.Index, m.Length);
@@ -276,9 +279,9 @@ namespace TarkovPriceChecker
             }
         }
 
-        public void setInraidColor()
+        public void SetInraidColor()
         {
-            var mc = Program.inraid_filter.Matches(iteminfo_text.Text);
+            var mc = Program.InRaidRegex.Matches(iteminfo_text.Text);
             foreach (Match m in mc)
             {
                 iteminfo_text.Select(m.Index, m.Length);
@@ -286,7 +289,7 @@ namespace TarkovPriceChecker
             }
         }
 
-        public void setCraftColor(Item item)
+        public void SetCraftColor(Item item)
         {
             var mc = new Regex(item.NameDisplay).Matches(iteminfo_text.Text);
             foreach (Match m in mc)
@@ -304,7 +307,7 @@ namespace TarkovPriceChecker
                 {
                     iteminfo_ball.Rows.Clear();
                     iteminfo_ball.Visible = false;
-                    iteminfo_text.Text = Program.loading;
+                    iteminfo_text.Text = Program.Loading;
                     iteminfo_panel.Location = point;
                     iteminfo_panel.Visible = true;
                 }
@@ -320,7 +323,7 @@ namespace TarkovPriceChecker
                 {
                     iteminfo_ball.Rows.Clear();
                     iteminfo_ball.Visible = false;
-                    iteminfo_text.Text = Program.notfinishloading;
+                    iteminfo_text.Text = Program.NotFinishLoading;
                     iteminfo_panel.Location = point;
                     iteminfo_panel.Visible = true;
                 }
@@ -338,14 +341,14 @@ namespace TarkovPriceChecker
                     {
                         if (!itemcompare_panel.Visible)
                         {
-                            compare_size = 0;
+                            _compareSize = 0;
                             ItemCompareGrid.Rows.Clear();
                             ResizeGrid(ItemCompareGrid);
                             itemcompare_panel.Location = point;
                             itemcompare_panel.Visible = true;
-                            itemcompare_text.Text = string.Format("{0}", Program.presscomparekey);
+                            itemcompare_text.Text = string.Format("{0}", Program.PressCompareKey);
                         }
-                        itemcompare_text.Text = string.Format("{0} Left : {1}", Program.loading, ++compare_size);
+                        itemcompare_text.Text = string.Format("{0} Left : {1}", Program.Loading, ++_compareSize);
                     }
                 }
             };
@@ -402,49 +405,45 @@ namespace TarkovPriceChecker
             p.Refresh();
         }
 
-        private void itemwindow_panel_Paint(object sender, PaintEventArgs e)
+        private void ItemWindowPanelPaint(object sender, PaintEventArgs e)
         {
             ControlPaint.DrawBorder(e.Graphics, (sender as Control).ClientRectangle, Color.White, ButtonBorderStyle.Solid);
         }
 
-        private void itemwindow_panel_SizeChanged(object sender, EventArgs e)
+        private void ItemWindowPanelSizeChanged(object sender, EventArgs e)
         {
             iteminfo_ball.Location = new Point(iteminfo_text.Location.X, iteminfo_text.Location.Y + iteminfo_text.Height + 15);
             FixLocation(sender as Control);
         }
 
-        private void itemwindow_panel_LocationChanged(object sender, EventArgs e)
+        private void ItemWindowPanelLocationChanged(object sender, EventArgs e)
         {
             FixLocation(sender as Control);
         }
 
-        private void Overlay_FormClosing(object sender, FormClosingEventArgs e)
-        {
-        }
-
-        private void itemwindow_text_ContentsResized(object sender, ContentsResizedEventArgs e)
+        private void ItemWindowTextContentsResized(object sender, ContentsResizedEventArgs e)
         {
             (sender as Control).ClientSize = new Size(e.NewRectangle.Width + 1, e.NewRectangle.Height + 1);
         }
 
-        private void itemcompare_text_MouseMove(object sender, MouseEventArgs e)
+        private void ItemCompareTextMouseMove(object sender, MouseEventArgs e)
         {
-            if (ismoving)
+            if (_isMoving)
             {
-                itemcompare_panel.Location = new Point(Cursor.Position.X - x, Cursor.Position.Y - y);
+                itemcompare_panel.Location = new Point(Cursor.Position.X - _x, Cursor.Position.Y - _y);
             }
         }
 
-        private void itemcompare_text_MouseDown(object sender, MouseEventArgs e)
+        private void ItemCompareTextMouseDown(object sender, MouseEventArgs e)
         {
-            x = Cursor.Position.X - itemcompare_panel.Location.X;
-            y = Cursor.Position.Y - itemcompare_panel.Location.Y;
-            ismoving = true;
+            _x = Cursor.Position.X - itemcompare_panel.Location.X;
+            _y = Cursor.Position.Y - itemcompare_panel.Location.Y;
+            _isMoving = true;
         }
 
-        private void itemcompare_text_MouseUp(object sender, MouseEventArgs e)
+        private void ItemCompareTextMouseUp(object sender, MouseEventArgs e)
         {
-            ismoving = false;
+            _isMoving = false;
         }
     }
 }

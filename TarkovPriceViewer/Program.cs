@@ -7,43 +7,47 @@ namespace TarkovPriceViewer
 {
     public static class Program
     {
-        private static MainForm main = null;
-        public static Dictionary<string, string> settings = new Dictionary<string, string>();
-        public static readonly List<Item> itemlist = new List<Item>();
-        public static readonly Dictionary<string, Ballistic> blist = new Dictionary<string, Ballistic>();
-        public static readonly Color[] BEColor = new Color[] { ColorTranslator.FromHtml("#B32425"),
+        public static Dictionary<string, string> Settings = new Dictionary<string, string>();
+        public static readonly List<Item> ItemList = new List<Item>();
+        public static readonly Dictionary<string, Ballistic> DicBallistic = new Dictionary<string, Ballistic>();
+        public static readonly Color[] BEColor = new Color[] {
+            ColorTranslator.FromHtml("#B32425"),
             ColorTranslator.FromHtml("#DD3333"),
             ColorTranslator.FromHtml("#EB6C0D"),
             ColorTranslator.FromHtml("#AC6600"),
             ColorTranslator.FromHtml("#FB9C0E"),
             ColorTranslator.FromHtml("#006400"),
-            ColorTranslator.FromHtml("#009900") };
+            ColorTranslator.FromHtml("#009900")
+        };
         public static readonly HashSet<string> BEType = new HashSet<string> { "Round", "Slug", "Buckshot", "Grenade launcher cartridge" };
-        public static readonly string setting_path = @"settings.json";
-        public static readonly string appname = "EscapeFromTarkov";
-        public static readonly string loading = "Loading...";
-        public static readonly string notfound = "Item Name Not Found.";
-        public static readonly string noflea = "Item not Found on Flea.";
-        public static readonly string notfinishloading = "Wait for Loading Data. Please Check Your Internet, and Check Tarkov Wiki Site.";
-        public static readonly string presscomparekey = "Please Press Compare Key.";
-        public static bool finishloadingballistics = false;
-        public static readonly string wiki = "https://escapefromtarkov.fandom.com/wiki/";
-        public static readonly string tarkovmarket = "https://tarkov-market.com/item/";
-        public static readonly string official = "https://www.escapefromtarkov.com/";
-        public static readonly string github = "https://github.com/hwangshkr/TarkovPriceViewer";
-        public static readonly string checkupdate = "https://github.com/hwangshkr/TarkovPriceViewer/raw/main/README.md";
-        public static readonly char rouble = '₽';
-        public static readonly char dollar = '$';
-        public static readonly char euro = '€';
-        public static readonly char[] splitcur = new char[] { rouble, dollar, euro };
-        public static readonly Regex inraid_filter = new Regex(@"in raid");
-        public static readonly Regex money_filter = new Regex(@"([\d,]+[₽\$€]|[₽\$€][\d,]+)");
+        public static readonly string SettingsPath = @"settings.json";
+        public static readonly string AppName = "EscapeFromTarkov";
+        public static readonly string Loading = "Loading...";
+        public static readonly string NotFound = "Item Name Not Found.";
+        public static readonly string NoFlea = "Item not Found on Flea.";
+        public static readonly string NotFinishLoading = "Wait for Loading Data. Please Check Your Internet, and Check Tarkov Wiki Site.";
+        public static readonly string PressCompareKey = "Please Press Compare Key.";
+        public static bool FinishLoadingBallistics = false;
+        public static readonly string WikiLink = "https://escapefromtarkov.fandom.com/wiki/";
+        public static readonly string TarkovMarketLink = "https://tarkov-market.com/item/";
+        public static readonly string OfficialLink = "https://www.escapefromtarkov.com/";
+        public static readonly string GithubLink = "https://github.com/hwangshkr/TarkovPriceViewer";
+        public static readonly string CheckUpdateLink = "https://github.com/hwangshkr/TarkovPriceViewer/raw/main/README.md";
+        public static readonly char RoubleChar = '₽';
+        public static readonly char DolarChar = '$';
+        public static readonly char EuroChar = '€';
+        public static readonly char[] SplitCur = new char[] { RoubleChar, DolarChar, EuroChar };
+        public static readonly Regex InRaidRegex = new Regex(@"in raid");
+        public static readonly Regex MoneyRegex = new Regex(@"([\d,]+[₽\$€]|[₽\$€][\d,]+)");
+
+        private static MainForm? _main = null;
 
         [STAThread]
         private static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
             foreach (var process in Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName))
             {
                 if (process.Id == Process.GetCurrentProcess().Id)
@@ -59,23 +63,28 @@ namespace TarkovPriceViewer
                     Debug.WriteLine(ex.Message);
                 }
             }
+
             ThreadPool.SetMinThreads(10, 10);
             ThreadPool.SetMaxThreads(20, 20);
-            var task = Task.Factory.StartNew(() => getBallistics());
+
+            var task = Task.Factory.StartNew(() => GetBallistics());
+
             LoadSettings();
-            getItemList();
-            main = new MainForm();
-            if (Convert.ToBoolean(settings["MinimizetoTrayWhenStartup"]))
+            GetItemList();
+
+            _main = new MainForm();
+
+            if (Convert.ToBoolean(Settings["MinimizetoTrayWhenStartup"]))
             {
                 Application.Run();
             }
             else
             {
-                Application.Run(main);
+                Application.Run(_main);
             }
         }
 
-        private static void getItemList()
+        private static void GetItemList()
         {
             string[] textValue = null;
             if (File.Exists(@"Resources\itemlist.txt"))
@@ -96,88 +105,88 @@ namespace TarkovPriceViewer
                     item.NameCompare2 = item.NameDisplay2.ToLower().ToCharArray();
                     item.MarketAddress = spl[1].Replace(" ", "_").Trim();
                     item.WikiAddress = spl[0].Replace(" ", "_").Trim();
-                    itemlist.Add(item);
+                    ItemList.Add(item);
                 }
             }
-            Debug.WriteLine("itemlist Count : " + itemlist.Count);
+            Debug.WriteLine("itemlist Count : " + ItemList.Count);
         }
 
         public static void LoadSettings()
         {
             try
             {
-                if (!File.Exists(setting_path))
+                if (!File.Exists(SettingsPath))
                 {
-                    File.Create(setting_path).Dispose();
+                    File.Create(SettingsPath).Dispose();
                 }
-                var text = File.ReadAllText(setting_path);
+                var text = File.ReadAllText(SettingsPath);
                 try
                 {
-                    settings = JsonSerializer.Deserialize<Dictionary<string, string>>(text);
+                    Settings = JsonSerializer.Deserialize<Dictionary<string, string>>(text);
                 }
                 catch (JsonException je)
                 {
                     Debug.WriteLine(je.Message);
                     text = "{}";
-                    settings = JsonSerializer.Deserialize<Dictionary<string, string>>(text);
+                    Settings = JsonSerializer.Deserialize<Dictionary<string, string>>(text);
                 }
-                settings.Remove("Version");//force
-                settings.Add("Version", "v1.16");//force
-                if (!settings.TryGetValue("MinimizetoTrayWhenStartup", out var st))
+                Settings.Remove("Version");//force
+                Settings.Add("Version", "v1.16");//force
+                if (!Settings.TryGetValue("MinimizetoTrayWhenStartup", out var st))
                 {
-                    settings.Add("MinimizetoTrayWhenStartup", "false");
+                    Settings.Add("MinimizetoTrayWhenStartup", "false");
                 }
-                if (!settings.TryGetValue("CloseOverlayWhenMouseMoved", out st))
+                if (!Settings.TryGetValue("CloseOverlayWhenMouseMoved", out st))
                 {
-                    settings.Add("CloseOverlayWhenMouseMoved", "true");
+                    Settings.Add("CloseOverlayWhenMouseMoved", "true");
                 }
-                if (!settings.TryGetValue("RandomItem", out st))
+                if (!Settings.TryGetValue("RandomItem", out st))
                 {
-                    settings.Add("RandomItem", "false");//false
+                    Settings.Add("RandomItem", "false");//false
                 }
-                if (!settings.TryGetValue("ShowOverlay_Key", out st))
+                if (!Settings.TryGetValue("ShowOverlay_Key", out st))
                 {
-                    settings.Add("ShowOverlay_Key", "120");
+                    Settings.Add("ShowOverlay_Key", "120");
                 }
-                if (!settings.TryGetValue("HideOverlay_Key", out st))
+                if (!Settings.TryGetValue("HideOverlay_Key", out st))
                 {
-                    settings.Add("HideOverlay_Key", "121");
+                    Settings.Add("HideOverlay_Key", "121");
                 }
-                if (!settings.TryGetValue("CompareOverlay_Key", out st))
+                if (!Settings.TryGetValue("CompareOverlay_Key", out st))
                 {
-                    settings.Add("CompareOverlay_Key", "119");
+                    Settings.Add("CompareOverlay_Key", "119");
                 }
-                if (!settings.TryGetValue("Overlay_Transparent", out st))
+                if (!Settings.TryGetValue("Overlay_Transparent", out st))
                 {
-                    settings.Add("Overlay_Transparent", "80");
+                    Settings.Add("Overlay_Transparent", "80");
                 }
-                if (!settings.TryGetValue("Show_Last_Price", out st))
+                if (!Settings.TryGetValue("Show_Last_Price", out st))
                 {
-                    settings.Add("Show_Last_Price", "true");
+                    Settings.Add("Show_Last_Price", "true");
                 }
-                if (!settings.TryGetValue("Show_Day_Price", out st))
+                if (!Settings.TryGetValue("Show_Day_Price", out st))
                 {
-                    settings.Add("Show_Day_Price", "true");
+                    Settings.Add("Show_Day_Price", "true");
                 }
-                if (!settings.TryGetValue("Show_Week_Price", out st))
+                if (!Settings.TryGetValue("Show_Week_Price", out st))
                 {
-                    settings.Add("Show_Week_Price", "true");
+                    Settings.Add("Show_Week_Price", "true");
                 }
-                if (!settings.TryGetValue("Sell_to_Trader", out st))
+                if (!Settings.TryGetValue("Sell_to_Trader", out st))
                 {
-                    settings.Add("Sell_to_Trader", "true");
+                    Settings.Add("Sell_to_Trader", "true");
                 }
-                if (!settings.TryGetValue("Buy_From_Trader", out st))
+                if (!Settings.TryGetValue("Buy_From_Trader", out st))
                 {
-                    settings.Add("Buy_From_Trader", "true");
+                    Settings.Add("Buy_From_Trader", "true");
                 }
-                if (!settings.TryGetValue("Needs", out st))
+                if (!Settings.TryGetValue("Needs", out st))
                 {
-                    settings.Add("Needs", "true");
+                    Settings.Add("Needs", "true");
                 }
-                if (!settings.TryGetValue("Barters_and_Crafts", out st))
+                if (!Settings.TryGetValue("Barters_and_Crafts", out st))
                 {
-                    settings.Add("Barters_and_Crafts", "true");
+                    Settings.Add("Barters_and_Crafts", "true");
                 }
             }
             catch (Exception e)
@@ -190,12 +199,12 @@ namespace TarkovPriceViewer
         {
             try
             {
-                if (!File.Exists(setting_path))
+                if (!File.Exists(SettingsPath))
                 {
-                    File.Create(setting_path).Dispose();
+                    File.Create(SettingsPath).Dispose();
                 }
-                var jsonString = JsonSerializer.Serialize(settings);
-                File.WriteAllText(setting_path, jsonString.Replace(",", ",\n"));
+                var jsonString = JsonSerializer.Serialize(Settings);
+                File.WriteAllText(SettingsPath, jsonString.Replace(",", ",\n"));
             }
             catch (Exception e)
             {
@@ -203,17 +212,17 @@ namespace TarkovPriceViewer
             }
         }
 
-        private static void getBallistics()
+        private static void GetBallistics()
         {
-            while (!finishloadingballistics)
+            while (!FinishLoadingBallistics)
             {
                 try
                 {
                     using (var wc = new TPVWebClient())
                     {
                         var doc = new HtmlAgilityPack.HtmlDocument();
-                        Debug.WriteLine(wiki + "Ballistics");
-                        doc.LoadHtml(wc.DownloadString(wiki + "Ballistics"));
+                        Debug.WriteLine(WikiLink + "Ballistics");
+                        doc.LoadHtml(wc.DownloadString(WikiLink + "Ballistics"));
                         var node_tm = doc.DocumentNode.SelectSingleNode("//table[@id='trkballtable']");
                         HtmlAgilityPack.HtmlNodeCollection nodes = null;
                         HtmlAgilityPack.HtmlNodeCollection sub_nodes = null;
@@ -225,7 +234,7 @@ namespace TarkovPriceViewer
                                 nodes = node_tm.SelectNodes(".//tr");
                                 if (nodes != null)
                                 {
-                                    blist.Clear();
+                                    DicBallistic.Clear();
                                     var sub_blist = new List<Ballistic>();
                                     foreach (var node in nodes)
                                     {
@@ -317,14 +326,14 @@ namespace TarkovPriceViewer
                                                 , sub_blist
                                                 );
                                             sub_blist.Add(b);
-                                            blist.Add(name, b);
+                                            DicBallistic.Add(name, b);
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                    finishloadingballistics = true;
+                    FinishLoadingBallistics = true;
                 }
                 catch (Exception e)
                 {

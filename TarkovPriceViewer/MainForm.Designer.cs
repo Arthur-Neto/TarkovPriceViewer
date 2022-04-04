@@ -132,7 +132,7 @@ namespace TarkovPriceChecker
             this.week_price_box.TabStop = false;
             this.week_price_box.Text = "week price";
             this.week_price_box.UseVisualStyleBackColor = true;
-            this.week_price_box.CheckedChanged += new System.EventHandler(this.week_price_box_CheckedChanged);
+            this.week_price_box.CheckedChanged += new System.EventHandler(this.WeekPriceBoxCheckedChanged);
             // 
             // day_price_box
             // 
@@ -144,7 +144,7 @@ namespace TarkovPriceChecker
             this.day_price_box.TabStop = false;
             this.day_price_box.Text = "day price";
             this.day_price_box.UseVisualStyleBackColor = true;
-            this.day_price_box.CheckedChanged += new System.EventHandler(this.day_price_box_CheckedChanged);
+            this.day_price_box.CheckedChanged += new System.EventHandler(this.DayPriceBoxCheckedChanged);
             // 
             // buy_from_trader_box
             // 
@@ -156,7 +156,7 @@ namespace TarkovPriceChecker
             this.buy_from_trader_box.TabStop = false;
             this.buy_from_trader_box.Text = "buy from trader";
             this.buy_from_trader_box.UseVisualStyleBackColor = true;
-            this.buy_from_trader_box.CheckedChanged += new System.EventHandler(this.buy_from_trader_box_CheckedChanged);
+            this.buy_from_trader_box.CheckedChanged += new System.EventHandler(this.BuyFromTraderBoxCheckedChanged);
             // 
             // needs_box
             // 
@@ -168,7 +168,7 @@ namespace TarkovPriceChecker
             this.needs_box.TabStop = false;
             this.needs_box.Text = "needs";
             this.needs_box.UseVisualStyleBackColor = true;
-            this.needs_box.CheckedChanged += new System.EventHandler(this.needs_box_CheckedChanged);
+            this.needs_box.CheckedChanged += new System.EventHandler(this.NeedsBoxCheckedChanged);
             // 
             // barters_and_crafts_box
             // 
@@ -180,7 +180,7 @@ namespace TarkovPriceChecker
             this.barters_and_crafts_box.TabStop = false;
             this.barters_and_crafts_box.Text = "barters and crafts";
             this.barters_and_crafts_box.UseVisualStyleBackColor = true;
-            this.barters_and_crafts_box.CheckedChanged += new System.EventHandler(this.barters_and_crafts_box_CheckedChanged);
+            this.barters_and_crafts_box.CheckedChanged += new System.EventHandler(this.BartersAndCraftsBoxCheckedChanged);
             // 
             // sell_to_trader_box
             // 
@@ -192,7 +192,7 @@ namespace TarkovPriceChecker
             this.sell_to_trader_box.TabStop = false;
             this.sell_to_trader_box.Text = "sell to trader";
             this.sell_to_trader_box.UseVisualStyleBackColor = true;
-            this.sell_to_trader_box.CheckedChanged += new System.EventHandler(this.sell_to_trader_box_CheckedChanged);
+            this.sell_to_trader_box.CheckedChanged += new System.EventHandler(this.SellToTraderBoxCheckedChanged);
             // 
             // last_price_box
             // 
@@ -204,7 +204,7 @@ namespace TarkovPriceChecker
             this.last_price_box.TabStop = false;
             this.last_price_box.Text = "last price";
             this.last_price_box.UseVisualStyleBackColor = true;
-            this.last_price_box.CheckedChanged += new System.EventHandler(this.last_price_box_CheckedChanged);
+            this.last_price_box.CheckedChanged += new System.EventHandler(this.LastPriceBoxCheckedChanged);
             // 
             // ShowOverlay_Button
             // 
@@ -448,7 +448,7 @@ namespace TarkovPriceChecker
             this.Exit_Button.TabStop = false;
             this.Exit_Button.Text = "Exit";
             this.Exit_Button.UseVisualStyleBackColor = true;
-            this.Exit_Button.Click += new System.EventHandler(this.Exit_Button_Click);
+            this.Exit_Button.Click += new System.EventHandler(this.ExitButtonClick);
             // 
             // panel6
             // 
@@ -511,7 +511,7 @@ namespace TarkovPriceChecker
             this.RandomItem.TabStop = false;
             this.RandomItem.Text = "Show Random Item Price";
             this.RandomItem.UseVisualStyleBackColor = true;
-            this.RandomItem.CheckedChanged += new System.EventHandler(this.RandomItem_CheckedChanged);
+            this.RandomItem.CheckedChanged += new System.EventHandler(this.RandomItemCheckedChanged);
             // 
             // ForFunRandom_Desc
             // 
@@ -526,7 +526,7 @@ namespace TarkovPriceChecker
             // check_idle_time
             // 
             this.check_idle_time.Interval = 60000;
-            this.check_idle_time.Tick += new System.EventHandler(this.check_idle_time_Tick);
+            this.check_idle_time.Tick += new System.EventHandler(this.CheckIdleTimeTick);
             // 
             // refresh_b
             // 
@@ -536,7 +536,7 @@ namespace TarkovPriceChecker
             this.refresh_b.TabIndex = 16;
             this.refresh_b.Text = "refresh";
             this.refresh_b.UseVisualStyleBackColor = true;
-            this.refresh_b.Click += new System.EventHandler(this.refresh_b_Click);
+            this.refresh_b.Click += new System.EventHandler(this.RefreshBClick);
             // 
             // MainForm
             // 
@@ -564,7 +564,6 @@ namespace TarkovPriceChecker
             this.Text = "TarkovPriceViewer";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
-            this.Load += new System.EventHandler(this.MainForm_load);
             this.TrayMenu.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();

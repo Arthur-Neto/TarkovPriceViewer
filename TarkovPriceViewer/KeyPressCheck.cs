@@ -4,11 +4,12 @@ namespace TarkovPriceChecker
 {
     public partial class KeyPressCheck : Form
     {
-        private readonly int button;
+        private readonly int _button;
 
         public KeyPressCheck(int button)
         {
-            this.button = button;
+            _button = button;
+
             InitializeComponent();
         }
 
@@ -22,27 +23,29 @@ namespace TarkovPriceChecker
 
         private void KeyPressCheck_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode != Keys.ShiftKey && e.KeyCode != Keys.Menu && e.KeyCode != Keys.ControlKey)
+            if (e.KeyCode is not Keys.ShiftKey and not Keys.Menu and not Keys.ControlKey)
             {
                 if (e.KeyCode != Keys.Escape)
                 {
-                    switch (button)
+                    switch (_button)
                     {
                         case 1:
-                            Program.settings["ShowOverlay_Key"] = ((int)e.KeyCode).ToString();
+                            Program.Settings["ShowOverlay_Key"] = ((int)e.KeyCode).ToString();
                             break;
                         case 2:
-                            Program.settings["HideOverlay_Key"] = ((int)e.KeyCode).ToString();
+                            Program.Settings["HideOverlay_Key"] = ((int)e.KeyCode).ToString();
                             break;
                         case 3:
-                            Program.settings["CompareOverlay_Key"] = ((int)e.KeyCode).ToString();
+                            Program.Settings["CompareOverlay_Key"] = ((int)e.KeyCode).ToString();
                             break;
                     }
+
                     if (Owner != null)
                     {
                         ((MainForm)Owner).ChangePressKeyData(e.KeyCode);
                     }
                 }
+
                 Close();
             }
         }

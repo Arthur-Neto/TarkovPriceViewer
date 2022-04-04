@@ -67,9 +67,9 @@ namespace TarkovPriceChecker
             this.iteminfo_panel.Padding = new System.Windows.Forms.Padding(10);
             this.iteminfo_panel.Size = new System.Drawing.Size(223, 79);
             this.iteminfo_panel.TabIndex = 8;
-            this.iteminfo_panel.LocationChanged += new System.EventHandler(this.itemwindow_panel_LocationChanged);
-            this.iteminfo_panel.SizeChanged += new System.EventHandler(this.itemwindow_panel_SizeChanged);
-            this.iteminfo_panel.Paint += new System.Windows.Forms.PaintEventHandler(this.itemwindow_panel_Paint);
+            this.iteminfo_panel.LocationChanged += new System.EventHandler(this.ItemWindowPanelLocationChanged);
+            this.iteminfo_panel.SizeChanged += new System.EventHandler(this.ItemWindowPanelSizeChanged);
+            this.iteminfo_panel.Paint += new System.Windows.Forms.PaintEventHandler(this.ItemWindowPanelPaint);
             // 
             // iteminfo_ball
             // 
@@ -168,7 +168,7 @@ namespace TarkovPriceChecker
             this.iteminfo_text.TabStop = false;
             this.iteminfo_text.Text = "text";
             this.iteminfo_text.WordWrap = false;
-            this.iteminfo_text.ContentsResized += new System.Windows.Forms.ContentsResizedEventHandler(this.itemwindow_text_ContentsResized);
+            this.iteminfo_text.ContentsResized += new System.Windows.Forms.ContentsResizedEventHandler(this.ItemWindowTextContentsResized);
             // 
             // itemcompare_panel
             // 
@@ -186,9 +186,9 @@ namespace TarkovPriceChecker
             this.itemcompare_panel.Padding = new System.Windows.Forms.Padding(10);
             this.itemcompare_panel.Size = new System.Drawing.Size(123, 82);
             this.itemcompare_panel.TabIndex = 7;
-            this.itemcompare_panel.LocationChanged += new System.EventHandler(this.itemwindow_panel_LocationChanged);
-            this.itemcompare_panel.SizeChanged += new System.EventHandler(this.itemwindow_panel_SizeChanged);
-            this.itemcompare_panel.Paint += new System.Windows.Forms.PaintEventHandler(this.itemwindow_panel_Paint);
+            this.itemcompare_panel.LocationChanged += new System.EventHandler(this.ItemWindowPanelLocationChanged);
+            this.itemcompare_panel.SizeChanged += new System.EventHandler(this.ItemWindowPanelSizeChanged);
+            this.itemcompare_panel.Paint += new System.Windows.Forms.PaintEventHandler(this.ItemWindowPanelPaint);
             // 
             // itemcompare_text
             // 
@@ -206,10 +206,10 @@ namespace TarkovPriceChecker
             this.itemcompare_text.TabStop = false;
             this.itemcompare_text.Text = "text";
             this.itemcompare_text.WordWrap = false;
-            this.itemcompare_text.ContentsResized += new System.Windows.Forms.ContentsResizedEventHandler(this.itemwindow_text_ContentsResized);
-            this.itemcompare_text.MouseDown += new System.Windows.Forms.MouseEventHandler(this.itemcompare_text_MouseDown);
-            this.itemcompare_text.MouseMove += new System.Windows.Forms.MouseEventHandler(this.itemcompare_text_MouseMove);
-            this.itemcompare_text.MouseUp += new System.Windows.Forms.MouseEventHandler(this.itemcompare_text_MouseUp);
+            this.itemcompare_text.ContentsResized += new System.Windows.Forms.ContentsResizedEventHandler(this.ItemWindowTextContentsResized);
+            this.itemcompare_text.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ItemCompareTextMouseDown);
+            this.itemcompare_text.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ItemCompareTextMouseMove);
+            this.itemcompare_text.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ItemCompareTextMouseUp);
             // 
             // ItemCompareGrid
             // 
@@ -316,7 +316,6 @@ namespace TarkovPriceChecker
             this.Text = "Overlay";
             this.TopMost = true;
             this.TransparencyKey = System.Drawing.Color.Fuchsia;
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Overlay_FormClosing);
             this.iteminfo_panel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.iteminfo_ball)).EndInit();
             this.itemcompare_panel.ResumeLayout(false);
