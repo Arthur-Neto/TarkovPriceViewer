@@ -90,19 +90,19 @@ namespace TarkovPriceChecker
             this.trayshow,
             this.trayexit});
             this.TrayMenu.Name = "TrayMenu";
-            this.TrayMenu.Size = new System.Drawing.Size(105, 48);
+            this.TrayMenu.Size = new System.Drawing.Size(104, 48);
             // 
             // trayshow
             // 
             this.trayshow.Name = "trayshow";
-            this.trayshow.Size = new System.Drawing.Size(104, 22);
+            this.trayshow.Size = new System.Drawing.Size(103, 22);
             this.trayshow.Text = "Show";
             this.trayshow.Click += new System.EventHandler(this.TrayShow_Click);
             // 
             // trayexit
             // 
             this.trayexit.Name = "trayexit";
-            this.trayexit.Size = new System.Drawing.Size(104, 22);
+            this.trayexit.Size = new System.Drawing.Size(103, 22);
             this.trayexit.Text = "Exit";
             this.trayexit.Click += new System.EventHandler(this.TrayExit_Click);
             // 
@@ -117,17 +117,20 @@ namespace TarkovPriceChecker
             this.panel1.Controls.Add(this.last_price_box);
             this.panel1.Controls.Add(this.ShowOverlay_Button);
             this.panel1.Controls.Add(this.ShowOverlay_Desc);
-            this.panel1.Location = new System.Drawing.Point(12, 105);
+            this.panel1.Location = new System.Drawing.Point(12, 131);
+            this.panel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(296, 105);
+            this.panel1.Size = new System.Drawing.Size(296, 131);
             this.panel1.TabIndex = 1;
             // 
             // week_price_box
             // 
             this.week_price_box.AutoSize = true;
-            this.week_price_box.Location = new System.Drawing.Point(197, 37);
+            this.week_price_box.ForeColor = System.Drawing.SystemColors.Control;
+            this.week_price_box.Location = new System.Drawing.Point(197, 46);
+            this.week_price_box.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.week_price_box.Name = "week_price_box";
-            this.week_price_box.Size = new System.Drawing.Size(86, 16);
+            this.week_price_box.Size = new System.Drawing.Size(82, 19);
             this.week_price_box.TabIndex = 7;
             this.week_price_box.TabStop = false;
             this.week_price_box.Text = "week price";
@@ -137,9 +140,11 @@ namespace TarkovPriceChecker
             // day_price_box
             // 
             this.day_price_box.AutoSize = true;
-            this.day_price_box.Location = new System.Drawing.Point(114, 37);
+            this.day_price_box.ForeColor = System.Drawing.SystemColors.Control;
+            this.day_price_box.Location = new System.Drawing.Point(114, 46);
+            this.day_price_box.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.day_price_box.Name = "day_price_box";
-            this.day_price_box.Size = new System.Drawing.Size(77, 16);
+            this.day_price_box.Size = new System.Drawing.Size(74, 19);
             this.day_price_box.TabIndex = 7;
             this.day_price_box.TabStop = false;
             this.day_price_box.Text = "day price";
@@ -149,9 +154,11 @@ namespace TarkovPriceChecker
             // buy_from_trader_box
             // 
             this.buy_from_trader_box.AutoSize = true;
-            this.buy_from_trader_box.Location = new System.Drawing.Point(132, 59);
+            this.buy_from_trader_box.ForeColor = System.Drawing.SystemColors.Control;
+            this.buy_from_trader_box.Location = new System.Drawing.Point(132, 74);
+            this.buy_from_trader_box.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.buy_from_trader_box.Name = "buy_from_trader_box";
-            this.buy_from_trader_box.Size = new System.Drawing.Size(110, 16);
+            this.buy_from_trader_box.Size = new System.Drawing.Size(109, 19);
             this.buy_from_trader_box.TabIndex = 7;
             this.buy_from_trader_box.TabStop = false;
             this.buy_from_trader_box.Text = "buy from trader";
@@ -161,9 +168,11 @@ namespace TarkovPriceChecker
             // needs_box
             // 
             this.needs_box.AutoSize = true;
-            this.needs_box.Location = new System.Drawing.Point(32, 80);
+            this.needs_box.ForeColor = System.Drawing.SystemColors.Control;
+            this.needs_box.Location = new System.Drawing.Point(32, 100);
+            this.needs_box.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.needs_box.Name = "needs_box";
-            this.needs_box.Size = new System.Drawing.Size(59, 16);
+            this.needs_box.Size = new System.Drawing.Size(57, 19);
             this.needs_box.TabIndex = 7;
             this.needs_box.TabStop = false;
             this.needs_box.Text = "needs";
@@ -173,9 +182,11 @@ namespace TarkovPriceChecker
             // barters_and_crafts_box
             // 
             this.barters_and_crafts_box.AutoSize = true;
-            this.barters_and_crafts_box.Location = new System.Drawing.Point(97, 80);
+            this.barters_and_crafts_box.ForeColor = System.Drawing.SystemColors.Control;
+            this.barters_and_crafts_box.Location = new System.Drawing.Point(97, 100);
+            this.barters_and_crafts_box.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.barters_and_crafts_box.Name = "barters_and_crafts_box";
-            this.barters_and_crafts_box.Size = new System.Drawing.Size(123, 16);
+            this.barters_and_crafts_box.Size = new System.Drawing.Size(117, 19);
             this.barters_and_crafts_box.TabIndex = 7;
             this.barters_and_crafts_box.TabStop = false;
             this.barters_and_crafts_box.Text = "barters and crafts";
@@ -185,9 +196,11 @@ namespace TarkovPriceChecker
             // sell_to_trader_box
             // 
             this.sell_to_trader_box.AutoSize = true;
-            this.sell_to_trader_box.Location = new System.Drawing.Point(32, 58);
+            this.sell_to_trader_box.ForeColor = System.Drawing.SystemColors.Control;
+            this.sell_to_trader_box.Location = new System.Drawing.Point(32, 72);
+            this.sell_to_trader_box.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.sell_to_trader_box.Name = "sell_to_trader_box";
-            this.sell_to_trader_box.Size = new System.Drawing.Size(94, 16);
+            this.sell_to_trader_box.Size = new System.Drawing.Size(91, 19);
             this.sell_to_trader_box.TabIndex = 7;
             this.sell_to_trader_box.TabStop = false;
             this.sell_to_trader_box.Text = "sell to trader";
@@ -197,9 +210,11 @@ namespace TarkovPriceChecker
             // last_price_box
             // 
             this.last_price_box.AutoSize = true;
-            this.last_price_box.Location = new System.Drawing.Point(32, 36);
+            this.last_price_box.ForeColor = System.Drawing.SystemColors.Control;
+            this.last_price_box.Location = new System.Drawing.Point(32, 45);
+            this.last_price_box.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.last_price_box.Name = "last_price_box";
-            this.last_price_box.Size = new System.Drawing.Size(76, 16);
+            this.last_price_box.Size = new System.Drawing.Size(73, 19);
             this.last_price_box.TabIndex = 7;
             this.last_price_box.TabStop = false;
             this.last_price_box.Text = "last price";
@@ -208,40 +223,46 @@ namespace TarkovPriceChecker
             // 
             // ShowOverlay_Button
             // 
-            this.ShowOverlay_Button.Location = new System.Drawing.Point(188, 8);
+            this.ShowOverlay_Button.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.ShowOverlay_Button.Location = new System.Drawing.Point(188, 10);
+            this.ShowOverlay_Button.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.ShowOverlay_Button.Name = "ShowOverlay_Button";
-            this.ShowOverlay_Button.Size = new System.Drawing.Size(59, 23);
+            this.ShowOverlay_Button.Size = new System.Drawing.Size(59, 29);
             this.ShowOverlay_Button.TabIndex = 1;
             this.ShowOverlay_Button.TabStop = false;
             this.ShowOverlay_Button.Text = "F9";
-            this.ShowOverlay_Button.UseVisualStyleBackColor = true;
+            this.ShowOverlay_Button.UseVisualStyleBackColor = false;
             this.ShowOverlay_Button.Click += new System.EventHandler(this.OverlayButtonClick);
             // 
             // ShowOverlay_Desc
             // 
             this.ShowOverlay_Desc.AutoSize = true;
-            this.ShowOverlay_Desc.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.ShowOverlay_Desc.Location = new System.Drawing.Point(21, 13);
+            this.ShowOverlay_Desc.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.ShowOverlay_Desc.ForeColor = System.Drawing.SystemColors.Control;
+            this.ShowOverlay_Desc.Location = new System.Drawing.Point(21, 16);
             this.ShowOverlay_Desc.Name = "ShowOverlay_Desc";
-            this.ShowOverlay_Desc.Size = new System.Drawing.Size(126, 12);
+            this.ShowOverlay_Desc.Size = new System.Drawing.Size(120, 15);
             this.ShowOverlay_Desc.TabIndex = 0;
             this.ShowOverlay_Desc.Text = "Show Overlay Key";
             // 
             // TransParent_Text
             // 
             this.TransParent_Text.AutoSize = true;
-            this.TransParent_Text.Location = new System.Drawing.Point(250, 36);
+            this.TransParent_Text.ForeColor = System.Drawing.SystemColors.Control;
+            this.TransParent_Text.Location = new System.Drawing.Point(250, 34);
             this.TransParent_Text.Name = "TransParent_Text";
-            this.TransParent_Text.Size = new System.Drawing.Size(27, 12);
+            this.TransParent_Text.Size = new System.Drawing.Size(29, 15);
             this.TransParent_Text.TabIndex = 4;
             this.TransParent_Text.Text = "80%";
             // 
             // CloseOverlayWhenMouseMoved
             // 
             this.CloseOverlayWhenMouseMoved.AutoSize = true;
-            this.CloseOverlayWhenMouseMoved.Location = new System.Drawing.Point(23, 51);
+            this.CloseOverlayWhenMouseMoved.ForeColor = System.Drawing.SystemColors.Control;
+            this.CloseOverlayWhenMouseMoved.Location = new System.Drawing.Point(23, 64);
+            this.CloseOverlayWhenMouseMoved.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.CloseOverlayWhenMouseMoved.Name = "CloseOverlayWhenMouseMoved";
-            this.CloseOverlayWhenMouseMoved.Size = new System.Drawing.Size(224, 16);
+            this.CloseOverlayWhenMouseMoved.Size = new System.Drawing.Size(211, 19);
             this.CloseOverlayWhenMouseMoved.TabIndex = 6;
             this.CloseOverlayWhenMouseMoved.TabStop = false;
             this.CloseOverlayWhenMouseMoved.Text = "Close Overlay When Mouse Moved";
@@ -250,7 +271,8 @@ namespace TarkovPriceChecker
             // 
             // TransParent_Bar
             // 
-            this.TransParent_Bar.Location = new System.Drawing.Point(9, 27);
+            this.TransParent_Bar.Location = new System.Drawing.Point(9, 34);
+            this.TransParent_Bar.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.TransParent_Bar.Maximum = 100;
             this.TransParent_Bar.Name = "TransParent_Bar";
             this.TransParent_Bar.Size = new System.Drawing.Size(235, 45);
@@ -262,87 +284,99 @@ namespace TarkovPriceChecker
             // HideOverlay_Desc2
             // 
             this.HideOverlay_Desc2.AutoSize = true;
-            this.HideOverlay_Desc2.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.HideOverlay_Desc2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.HideOverlay_Desc2.ForeColor = System.Drawing.Color.Red;
-            this.HideOverlay_Desc2.Location = new System.Drawing.Point(34, 36);
+            this.HideOverlay_Desc2.Location = new System.Drawing.Point(34, 45);
             this.HideOverlay_Desc2.Name = "HideOverlay_Desc2";
-            this.HideOverlay_Desc2.Size = new System.Drawing.Size(230, 12);
+            this.HideOverlay_Desc2.Size = new System.Drawing.Size(212, 15);
             this.HideOverlay_Desc2.TabIndex = 0;
             this.HideOverlay_Desc2.Text = "※ Tab, Esc Keys are fixed to use";
             // 
             // TransParent_Desc
             // 
             this.TransParent_Desc.AutoSize = true;
-            this.TransParent_Desc.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.TransParent_Desc.Location = new System.Drawing.Point(21, 12);
+            this.TransParent_Desc.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.TransParent_Desc.ForeColor = System.Drawing.SystemColors.Control;
+            this.TransParent_Desc.Location = new System.Drawing.Point(21, 15);
             this.TransParent_Desc.Name = "TransParent_Desc";
-            this.TransParent_Desc.Size = new System.Drawing.Size(107, 12);
+            this.TransParent_Desc.Size = new System.Drawing.Size(104, 15);
             this.TransParent_Desc.TabIndex = 0;
             this.TransParent_Desc.Text = "Control Opacity";
             // 
             // HideOverlay_Button
             // 
-            this.HideOverlay_Button.Location = new System.Drawing.Point(184, 8);
+            this.HideOverlay_Button.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.HideOverlay_Button.Location = new System.Drawing.Point(184, 10);
+            this.HideOverlay_Button.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.HideOverlay_Button.Name = "HideOverlay_Button";
-            this.HideOverlay_Button.Size = new System.Drawing.Size(59, 23);
+            this.HideOverlay_Button.Size = new System.Drawing.Size(59, 29);
             this.HideOverlay_Button.TabIndex = 1;
             this.HideOverlay_Button.TabStop = false;
             this.HideOverlay_Button.Text = "F10";
-            this.HideOverlay_Button.UseVisualStyleBackColor = true;
+            this.HideOverlay_Button.UseVisualStyleBackColor = false;
             this.HideOverlay_Button.Click += new System.EventHandler(this.OverlayButtonClick);
             // 
             // HideOverlay_Desc
             // 
             this.HideOverlay_Desc.AutoSize = true;
-            this.HideOverlay_Desc.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.HideOverlay_Desc.Location = new System.Drawing.Point(17, 13);
+            this.HideOverlay_Desc.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.HideOverlay_Desc.ForeColor = System.Drawing.SystemColors.Control;
+            this.HideOverlay_Desc.Location = new System.Drawing.Point(17, 16);
             this.HideOverlay_Desc.Name = "HideOverlay_Desc";
-            this.HideOverlay_Desc.Size = new System.Drawing.Size(119, 12);
+            this.HideOverlay_Desc.Size = new System.Drawing.Size(115, 15);
             this.HideOverlay_Desc.TabIndex = 0;
             this.HideOverlay_Desc.Text = "Hide Overlay Key";
             // 
             // CheckUpdate
             // 
-            this.CheckUpdate.Location = new System.Drawing.Point(3, 3);
+            this.CheckUpdate.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.CheckUpdate.Location = new System.Drawing.Point(3, 4);
+            this.CheckUpdate.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.CheckUpdate.Name = "CheckUpdate";
-            this.CheckUpdate.Size = new System.Drawing.Size(115, 23);
+            this.CheckUpdate.Size = new System.Drawing.Size(115, 29);
             this.CheckUpdate.TabIndex = 5;
             this.CheckUpdate.TabStop = false;
-            this.CheckUpdate.Text = "CheckUpdate";
-            this.CheckUpdate.UseVisualStyleBackColor = true;
+            this.CheckUpdate.Text = "Check Update";
+            this.CheckUpdate.UseVisualStyleBackColor = false;
             this.CheckUpdate.Click += new System.EventHandler(this.CheckUpdate_Click);
             // 
             // Github
             // 
-            this.Github.Location = new System.Drawing.Point(487, 4);
+            this.Github.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.Github.Location = new System.Drawing.Point(487, 5);
+            this.Github.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Github.Name = "Github";
-            this.Github.Size = new System.Drawing.Size(110, 23);
+            this.Github.Size = new System.Drawing.Size(110, 29);
             this.Github.TabIndex = 5;
             this.Github.TabStop = false;
             this.Github.Text = "Github";
-            this.Github.UseVisualStyleBackColor = true;
+            this.Github.UseVisualStyleBackColor = false;
             this.Github.Click += new System.EventHandler(this.GithubClick);
             // 
             // TarkovMarket
             // 
-            this.TarkovMarket.Location = new System.Drawing.Point(255, 4);
+            this.TarkovMarket.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.TarkovMarket.Location = new System.Drawing.Point(255, 5);
+            this.TarkovMarket.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.TarkovMarket.Name = "TarkovMarket";
-            this.TarkovMarket.Size = new System.Drawing.Size(110, 23);
+            this.TarkovMarket.Size = new System.Drawing.Size(110, 29);
             this.TarkovMarket.TabIndex = 5;
             this.TarkovMarket.TabStop = false;
             this.TarkovMarket.Text = "Tarkov Market";
-            this.TarkovMarket.UseVisualStyleBackColor = true;
+            this.TarkovMarket.UseVisualStyleBackColor = false;
             this.TarkovMarket.Click += new System.EventHandler(this.TarkovMarketClick);
             // 
             // TarkovWiki
             // 
-            this.TarkovWiki.Location = new System.Drawing.Point(371, 4);
+            this.TarkovWiki.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.TarkovWiki.Location = new System.Drawing.Point(371, 5);
+            this.TarkovWiki.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.TarkovWiki.Name = "TarkovWiki";
-            this.TarkovWiki.Size = new System.Drawing.Size(110, 23);
+            this.TarkovWiki.Size = new System.Drawing.Size(110, 29);
             this.TarkovWiki.TabIndex = 5;
             this.TarkovWiki.TabStop = false;
             this.TarkovWiki.Text = "Tarkov Wiki";
-            this.TarkovWiki.UseVisualStyleBackColor = true;
+            this.TarkovWiki.UseVisualStyleBackColor = false;
             this.TarkovWiki.Click += new System.EventHandler(this.TarkovWikiClick);
             // 
             // panel4
@@ -352,38 +386,44 @@ namespace TarkovPriceChecker
             this.panel4.Controls.Add(this.TarkovWiki);
             this.panel4.Controls.Add(this.Tarkov_Official);
             this.panel4.Controls.Add(this.TarkovMarket);
-            this.panel4.Location = new System.Drawing.Point(12, 68);
+            this.panel4.Location = new System.Drawing.Point(12, 85);
+            this.panel4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(600, 31);
+            this.panel4.Size = new System.Drawing.Size(600, 39);
             this.panel4.TabIndex = 7;
             // 
             // DataProvidedBy
             // 
             this.DataProvidedBy.AutoSize = true;
-            this.DataProvidedBy.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.DataProvidedBy.Location = new System.Drawing.Point(11, 9);
+            this.DataProvidedBy.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.DataProvidedBy.ForeColor = System.Drawing.SystemColors.Control;
+            this.DataProvidedBy.Location = new System.Drawing.Point(11, 11);
             this.DataProvidedBy.Name = "DataProvidedBy";
-            this.DataProvidedBy.Size = new System.Drawing.Size(118, 12);
+            this.DataProvidedBy.Size = new System.Drawing.Size(116, 15);
             this.DataProvidedBy.TabIndex = 6;
             this.DataProvidedBy.Text = "Data Provided By";
             // 
             // Tarkov_Official
             // 
-            this.Tarkov_Official.Location = new System.Drawing.Point(139, 4);
+            this.Tarkov_Official.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.Tarkov_Official.Location = new System.Drawing.Point(139, 5);
+            this.Tarkov_Official.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Tarkov_Official.Name = "Tarkov_Official";
-            this.Tarkov_Official.Size = new System.Drawing.Size(110, 23);
+            this.Tarkov_Official.Size = new System.Drawing.Size(110, 29);
             this.Tarkov_Official.TabIndex = 5;
             this.Tarkov_Official.TabStop = false;
             this.Tarkov_Official.Text = "Tarkov Official";
-            this.Tarkov_Official.UseVisualStyleBackColor = true;
+            this.Tarkov_Official.UseVisualStyleBackColor = false;
             this.Tarkov_Official.Click += new System.EventHandler(this.Tarkov_Official_Click);
             // 
             // MinimizetoTrayWhenStartup
             // 
             this.MinimizetoTrayWhenStartup.AutoSize = true;
-            this.MinimizetoTrayWhenStartup.Location = new System.Drawing.Point(334, 330);
+            this.MinimizetoTrayWhenStartup.ForeColor = System.Drawing.SystemColors.Control;
+            this.MinimizetoTrayWhenStartup.Location = new System.Drawing.Point(343, 432);
+            this.MinimizetoTrayWhenStartup.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.MinimizetoTrayWhenStartup.Name = "MinimizetoTrayWhenStartup";
-            this.MinimizetoTrayWhenStartup.Size = new System.Drawing.Size(198, 16);
+            this.MinimizetoTrayWhenStartup.Size = new System.Drawing.Size(188, 19);
             this.MinimizetoTrayWhenStartup.TabIndex = 6;
             this.MinimizetoTrayWhenStartup.TabStop = false;
             this.MinimizetoTrayWhenStartup.Text = "Minimize to Tray When Startup";
@@ -393,16 +433,19 @@ namespace TarkovPriceChecker
             // Version
             // 
             this.Version.AutoSize = true;
-            this.Version.Location = new System.Drawing.Point(123, 8);
+            this.Version.ForeColor = System.Drawing.SystemColors.Control;
+            this.Version.Location = new System.Drawing.Point(123, 10);
             this.Version.Name = "Version";
-            this.Version.Size = new System.Drawing.Size(48, 12);
+            this.Version.Size = new System.Drawing.Size(45, 15);
             this.Version.TabIndex = 9;
             this.Version.Text = "Version";
             // 
             // pictureBox1
             // 
             this.pictureBox1.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox1.Location = new System.Drawing.Point(140, 12);
+            this.pictureBox1.Image = global::TarkovPriceViewer.Properties.Resources.title;
+            this.pictureBox1.Location = new System.Drawing.Point(140, 15);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(350, 50);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -415,9 +458,10 @@ namespace TarkovPriceChecker
             this.panel2.Controls.Add(this.HideOverlay_Desc);
             this.panel2.Controls.Add(this.HideOverlay_Button);
             this.panel2.Controls.Add(this.HideOverlay_Desc2);
-            this.panel2.Location = new System.Drawing.Point(316, 105);
+            this.panel2.Location = new System.Drawing.Point(316, 131);
+            this.panel2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(296, 75);
+            this.panel2.Size = new System.Drawing.Size(296, 94);
             this.panel2.TabIndex = 11;
             // 
             // panel3
@@ -425,29 +469,33 @@ namespace TarkovPriceChecker
             this.panel3.Controls.Add(this.TransParent_Text);
             this.panel3.Controls.Add(this.TransParent_Desc);
             this.panel3.Controls.Add(this.TransParent_Bar);
-            this.panel3.Location = new System.Drawing.Point(12, 273);
+            this.panel3.Location = new System.Drawing.Point(12, 341);
+            this.panel3.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(296, 51);
+            this.panel3.Size = new System.Drawing.Size(296, 64);
             this.panel3.TabIndex = 12;
             // 
             // panel5
             // 
             this.panel5.Controls.Add(this.Version);
             this.panel5.Controls.Add(this.CheckUpdate);
-            this.panel5.Location = new System.Drawing.Point(15, 325);
+            this.panel5.Location = new System.Drawing.Point(12, 420);
+            this.panel5.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(184, 28);
+            this.panel5.Size = new System.Drawing.Size(184, 35);
             this.panel5.TabIndex = 13;
             // 
             // Exit_Button
             // 
-            this.Exit_Button.Location = new System.Drawing.Point(538, 326);
+            this.Exit_Button.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.Exit_Button.Location = new System.Drawing.Point(537, 426);
+            this.Exit_Button.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Exit_Button.Name = "Exit_Button";
-            this.Exit_Button.Size = new System.Drawing.Size(74, 23);
+            this.Exit_Button.Size = new System.Drawing.Size(74, 29);
             this.Exit_Button.TabIndex = 5;
             this.Exit_Button.TabStop = false;
             this.Exit_Button.Text = "Exit";
-            this.Exit_Button.UseVisualStyleBackColor = true;
+            this.Exit_Button.UseVisualStyleBackColor = false;
             this.Exit_Button.Click += new System.EventHandler(this.ExitButtonClick);
             // 
             // panel6
@@ -455,40 +503,44 @@ namespace TarkovPriceChecker
             this.panel6.Controls.Add(this.CompareOverlay_Desc);
             this.panel6.Controls.Add(this.CompareOverlay_Button);
             this.panel6.Controls.Add(this.CompareOverlay_Desc2);
-            this.panel6.Location = new System.Drawing.Point(316, 186);
+            this.panel6.Location = new System.Drawing.Point(316, 232);
+            this.panel6.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(296, 73);
+            this.panel6.Size = new System.Drawing.Size(296, 91);
             this.panel6.TabIndex = 14;
             // 
             // CompareOverlay_Desc
             // 
             this.CompareOverlay_Desc.AutoSize = true;
-            this.CompareOverlay_Desc.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.CompareOverlay_Desc.Location = new System.Drawing.Point(17, 12);
+            this.CompareOverlay_Desc.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.CompareOverlay_Desc.ForeColor = System.Drawing.SystemColors.Control;
+            this.CompareOverlay_Desc.Location = new System.Drawing.Point(17, 15);
             this.CompareOverlay_Desc.Name = "CompareOverlay_Desc";
-            this.CompareOverlay_Desc.Size = new System.Drawing.Size(149, 12);
+            this.CompareOverlay_Desc.Size = new System.Drawing.Size(143, 15);
             this.CompareOverlay_Desc.TabIndex = 0;
             this.CompareOverlay_Desc.Text = "Compare Overlay Key";
             // 
             // CompareOverlay_Button
             // 
-            this.CompareOverlay_Button.Location = new System.Drawing.Point(184, 7);
+            this.CompareOverlay_Button.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.CompareOverlay_Button.Location = new System.Drawing.Point(184, 9);
+            this.CompareOverlay_Button.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.CompareOverlay_Button.Name = "CompareOverlay_Button";
-            this.CompareOverlay_Button.Size = new System.Drawing.Size(59, 23);
+            this.CompareOverlay_Button.Size = new System.Drawing.Size(59, 29);
             this.CompareOverlay_Button.TabIndex = 1;
             this.CompareOverlay_Button.TabStop = false;
             this.CompareOverlay_Button.Text = "F8";
-            this.CompareOverlay_Button.UseVisualStyleBackColor = true;
+            this.CompareOverlay_Button.UseVisualStyleBackColor = false;
             this.CompareOverlay_Button.Click += new System.EventHandler(this.OverlayButtonClick);
             // 
             // CompareOverlay_Desc2
             // 
             this.CompareOverlay_Desc2.AutoSize = true;
-            this.CompareOverlay_Desc2.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.CompareOverlay_Desc2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.CompareOverlay_Desc2.ForeColor = System.Drawing.Color.Red;
-            this.CompareOverlay_Desc2.Location = new System.Drawing.Point(34, 33);
+            this.CompareOverlay_Desc2.Location = new System.Drawing.Point(34, 41);
             this.CompareOverlay_Desc2.Name = "CompareOverlay_Desc2";
-            this.CompareOverlay_Desc2.Size = new System.Drawing.Size(101, 12);
+            this.CompareOverlay_Desc2.Size = new System.Drawing.Size(97, 15);
             this.CompareOverlay_Desc2.TabIndex = 0;
             this.CompareOverlay_Desc2.Text = "※ Experiential";
             // 
@@ -496,17 +548,20 @@ namespace TarkovPriceChecker
             // 
             this.panel7.Controls.Add(this.RandomItem);
             this.panel7.Controls.Add(this.ForFunRandom_Desc);
-            this.panel7.Location = new System.Drawing.Point(12, 216);
+            this.panel7.Location = new System.Drawing.Point(12, 270);
+            this.panel7.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.panel7.Name = "panel7";
-            this.panel7.Size = new System.Drawing.Size(296, 51);
+            this.panel7.Size = new System.Drawing.Size(296, 64);
             this.panel7.TabIndex = 15;
             // 
             // RandomItem
             // 
             this.RandomItem.AutoSize = true;
-            this.RandomItem.Location = new System.Drawing.Point(32, 27);
+            this.RandomItem.ForeColor = System.Drawing.SystemColors.Control;
+            this.RandomItem.Location = new System.Drawing.Point(32, 34);
+            this.RandomItem.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.RandomItem.Name = "RandomItem";
-            this.RandomItem.Size = new System.Drawing.Size(168, 16);
+            this.RandomItem.Size = new System.Drawing.Size(159, 19);
             this.RandomItem.TabIndex = 6;
             this.RandomItem.TabStop = false;
             this.RandomItem.Text = "Show Random Item Price";
@@ -516,10 +571,11 @@ namespace TarkovPriceChecker
             // ForFunRandom_Desc
             // 
             this.ForFunRandom_Desc.AutoSize = true;
-            this.ForFunRandom_Desc.Font = new System.Drawing.Font("굴림", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.ForFunRandom_Desc.Location = new System.Drawing.Point(21, 9);
+            this.ForFunRandom_Desc.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.ForFunRandom_Desc.ForeColor = System.Drawing.SystemColors.Control;
+            this.ForFunRandom_Desc.Location = new System.Drawing.Point(21, 11);
             this.ForFunRandom_Desc.Name = "ForFunRandom_Desc";
-            this.ForFunRandom_Desc.Size = new System.Drawing.Size(156, 12);
+            this.ForFunRandom_Desc.Size = new System.Drawing.Size(154, 15);
             this.ForFunRandom_Desc.TabIndex = 0;
             this.ForFunRandom_Desc.Text = "For Fun! Random Item!";
             // 
@@ -530,21 +586,23 @@ namespace TarkovPriceChecker
             // 
             // refresh_b
             // 
-            this.refresh_b.Location = new System.Drawing.Point(538, 301);
+            this.refresh_b.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.refresh_b.Location = new System.Drawing.Point(537, 391);
+            this.refresh_b.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.refresh_b.Name = "refresh_b";
-            this.refresh_b.Size = new System.Drawing.Size(75, 23);
+            this.refresh_b.Size = new System.Drawing.Size(75, 29);
             this.refresh_b.TabIndex = 16;
-            this.refresh_b.Text = "refresh";
-            this.refresh_b.UseVisualStyleBackColor = true;
+            this.refresh_b.Text = "Refresh";
+            this.refresh_b.UseVisualStyleBackColor = false;
             this.refresh_b.Click += new System.EventHandler(this.RefreshBClick);
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(624, 361);
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.ClientSize = new System.Drawing.Size(624, 468);
             this.Controls.Add(this.refresh_b);
             this.Controls.Add(this.panel5);
             this.Controls.Add(this.panel7);
@@ -557,6 +615,7 @@ namespace TarkovPriceChecker
             this.Controls.Add(this.MinimizetoTrayWhenStartup);
             this.Controls.Add(this.panel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "MainForm";
