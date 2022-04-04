@@ -1,5 +1,5 @@
 ﻿
-namespace TarkovPriceViewer
+namespace TarkovPriceChecker
 {
     partial class MainForm
     {
@@ -413,7 +413,7 @@ namespace TarkovPriceViewer
             // pictureBox1
             // 
             this.pictureBox1.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox1.Image = global::TarkovPriceViewer.Properties.Resources.title;
+            this.pictureBox1.Image = global::TarkovPriceChecker.Properties.Resources.title;
             this.pictureBox1.Location = new System.Drawing.Point(140, 12);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(350, 50);

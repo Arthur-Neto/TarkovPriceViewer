@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace TarkovPriceViewer
+namespace TarkovPriceChecker
 {
     public partial class Overlay : Form
     {

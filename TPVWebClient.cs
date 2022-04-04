@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TarkovPriceViewer
+namespace TarkovPriceChecker
 {
     class TPVWebClient : WebClient
     {

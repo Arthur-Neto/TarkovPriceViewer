@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TarkovPriceViewer.Properties {
+namespace TarkovPriceChecker.Properties {
     using System;
     
     

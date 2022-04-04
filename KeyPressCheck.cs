@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace TarkovPriceViewer
+namespace TarkovPriceChecker
 {
     public partial class KeyPressCheck : Form
     {

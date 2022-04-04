@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tesseract;
 
-namespace TarkovPriceViewer
+namespace TarkovPriceChecker
 {
     public partial class MainForm : Form
     {

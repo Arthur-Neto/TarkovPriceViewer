@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TarkovPriceViewer
+namespace TarkovPriceChecker
 {
     public class Item
     {
