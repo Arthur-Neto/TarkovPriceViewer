@@ -1,5 +1,5 @@
 ﻿
-namespace TarkovPriceChecker
+namespace TarkovPriceViewer.Forms
 {
     partial class KeyPressCheck
     {

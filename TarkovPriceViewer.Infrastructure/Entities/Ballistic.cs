@@ -1,4 +1,4 @@
-﻿namespace TarkovPriceViewer
+﻿namespace TarkovPriceViewer.Infrastructure.Entities
 {
     public class Ballistic
     {
@@ -22,7 +22,7 @@
 
         public string Special; // Subsonic or tracer
 
-        public List<Ballistic> Calibarlist;
+        public List<Ballistic> BallisticList;
 
         public Ballistic(
             string name, string damage, string pP, string aD,
@@ -45,7 +45,7 @@
             BE5 = bE5;
             BE6 = bE6;
             Special = special;
-            Calibarlist = calibarlist;
+            BallisticList = calibarlist;
         }
 
         public string[] Data()

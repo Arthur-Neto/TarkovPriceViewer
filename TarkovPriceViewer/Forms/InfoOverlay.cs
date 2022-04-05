@@ -4,11 +4,11 @@ using Microsoft.Extensions.Options;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using TarkovPriceViewer;
+using TarkovPriceViewer.Infrastructure.Entities;
 using TarkovPriceViewer.Infrastructure.Settings;
 using TarkovPriceViewer.Properties;
 
-namespace TarkovPriceChecker
+namespace TarkovPriceViewer.Forms
 {
     public partial class InfoOverlay : Form
     {
@@ -22,9 +22,6 @@ namespace TarkovPriceChecker
         private const int WS_EX_TOOLWINDOW = 0x00000080;
         private const int WS_EX_LAYERED = 0x80000;
         private const int WS_EX_TRANSPARENT = 0x20;
-
-        private static bool _isMoving = false;
-        private static int _x, _y;
 
         private static readonly Regex _inRaidRegex = new Regex(@"in raid");
         private static readonly Regex _moneyRegex = new Regex(@"([\d,]+[₽\$€]|[₽\$€][\d,]+)");
@@ -57,6 +54,7 @@ namespace TarkovPriceChecker
             _resources = resources;
             _logger = logger;
             _appSettings = options.Value;
+
             TopMost = true;
 
             var style = GetWindowLong(Handle, GWL_EXSTYLE);
@@ -66,8 +64,7 @@ namespace TarkovPriceChecker
             SettingFormPos();
             InitializeBallistics();
 
-            iteminfo_panel.Visible = false;
-            itemcompare_panel.Visible = false;
+            itemInfoPanel.Visible = false;
         }
 
         public void SettingFormPos()
@@ -78,19 +75,19 @@ namespace TarkovPriceChecker
 
         public void InitializeBallistics()
         {
-            iteminfo_ball.ColumnCount = 9;
-            iteminfo_ball.Columns[0].Name = "Type";
-            iteminfo_ball.Columns[1].Name = "Name";
-            iteminfo_ball.Columns[2].Name = "Damage";
-            iteminfo_ball.Columns[3].Name = "1";
-            iteminfo_ball.Columns[4].Name = "2";
-            iteminfo_ball.Columns[5].Name = "3";
-            iteminfo_ball.Columns[6].Name = "4";
-            iteminfo_ball.Columns[7].Name = "5";
-            iteminfo_ball.Columns[8].Name = "6";
-            iteminfo_ball.Visible = false;
-            iteminfo_ball.ClearSelection();
-            ResizeGrid(iteminfo_ball);
+            itemInfoBall.ColumnCount = 9;
+            itemInfoBall.Columns[0].Name = "Type";
+            itemInfoBall.Columns[1].Name = "Name";
+            itemInfoBall.Columns[2].Name = "Damage";
+            itemInfoBall.Columns[3].Name = "1";
+            itemInfoBall.Columns[4].Name = "2";
+            itemInfoBall.Columns[5].Name = "3";
+            itemInfoBall.Columns[6].Name = "4";
+            itemInfoBall.Columns[7].Name = "5";
+            itemInfoBall.Columns[8].Name = "6";
+            itemInfoBall.Visible = false;
+            itemInfoBall.ClearSelection();
+            ResizeGrid(itemInfoBall);
         }
 
         public void ResizeGrid(DataGridView view)
@@ -102,23 +99,23 @@ namespace TarkovPriceChecker
 
         public void SetBallisticsColor(Item item)
         {
-            for (var b = 0; b < iteminfo_ball.Rows.Count; b++)
+            for (var b = 0; b < itemInfoBall.Rows.Count; b++)
             {
-                for (var i = 0; i < iteminfo_ball.Rows[b].Cells.Count; i++)
+                for (var i = 0; i < itemInfoBall.Rows[b].Cells.Count; i++)
                 {
                     if (i == 0)
                     {
-                        if (iteminfo_ball.Rows[b].Cells[i].Value.Equals(item.NameDisplay) || iteminfo_ball.Rows[b].Cells[i].Value.Equals(item.NameDisplay2))
+                        if (itemInfoBall.Rows[b].Cells[i].Value.Equals(item.NameDisplay) || itemInfoBall.Rows[b].Cells[i].Value.Equals(item.NameDisplay2))
                         {
-                            iteminfo_ball.Rows[b].Cells[i].Style.ForeColor = Color.Gold;
+                            itemInfoBall.Rows[b].Cells[i].Style.ForeColor = Color.Gold;
                         }
                     }
                     else if (i >= 3)
                     {
                         try
                         {
-                            int.TryParse((string)iteminfo_ball.Rows[b].Cells[i].Value, out var level);
-                            iteminfo_ball.Rows[b].Cells[i].Style.BackColor = _beColor[level];
+                            int.TryParse((string)itemInfoBall.Rows[b].Cells[i].Value, out var level);
+                            itemInfoBall.Rows[b].Cells[i].Style.BackColor = _beColor[level];
                         }
                         catch (Exception ex)
                         {
@@ -127,24 +124,24 @@ namespace TarkovPriceChecker
                     }
                 }
             }
-            iteminfo_ball.Refresh();
+            itemInfoBall.Refresh();
         }
 
-        public void ShowInfo(Item item, CancellationToken cts_one)
+        public void ShowInfo(Item item, CancellationToken cancellationToken)
         {
             Action show = delegate ()
             {
-                if (!cts_one.IsCancellationRequested)
+                if (cancellationToken.IsCancellationRequested is false)
                 {
                     lock (_lock)
                     {
                         if (item == null || item.MarketAddress == null)
                         {
-                            iteminfo_text.Text = _resources["NotFound"];
+                            itemInfoText.Text = _resources["NotFound"];
                         }
                         else if (item.PriceLast == null)
                         {
-                            iteminfo_text.Text = _resources["NoFlea"];
+                            itemInfoText.Text = _resources["NoFlea"];
                         }
                         else
                         {
@@ -176,21 +173,23 @@ namespace TarkovPriceChecker
                             {
                                 sb.Append(string.Format("\nNeeds :\n{0}\n", item.Needs));
                             }
-                            if (_appSettings.BartersNCrafts && item.Bartersandcrafts != null)
+                            if (_appSettings.BartersNCrafts && item.BartersNCrafts != null)
                             {
-                                sb.Append(string.Format("\nBarters & Crafts :\n{0}\n", item.Bartersandcrafts));
+                                sb.Append(string.Format("\nBarters & Crafts :\n{0}\n", item.BartersNCrafts));
                             }
-                            iteminfo_text.Text = sb.ToString().Trim();
+                            itemInfoText.Text = sb.ToString().Trim();
+
                             SetTextColors(item);
+
                             if (item.Ballistic != null)
                             {
-                                foreach (var b in item.Ballistic.Calibarlist)
+                                foreach (var ballistic in item.Ballistic.BallisticList)
                                 {
-                                    iteminfo_ball.Rows.Add(b.Data());
+                                    itemInfoBall.Rows.Add(ballistic.Data());
                                 }
-                                iteminfo_ball.Visible = true;
+                                itemInfoBall.Visible = true;
                                 SetBallisticsColor(item);
-                                ResizeGrid(iteminfo_ball);
+                                ResizeGrid(itemInfoBall);
                             }
                         }
                     }
@@ -208,31 +207,31 @@ namespace TarkovPriceChecker
 
         public void SetPriceColor()
         {
-            var mc = _moneyRegex.Matches(iteminfo_text.Text);
+            var mc = _moneyRegex.Matches(itemInfoText.Text);
             foreach (Match m in mc)
             {
-                iteminfo_text.Select(m.Index, m.Length);
-                iteminfo_text.SelectionColor = Color.Gold;
+                itemInfoText.Select(m.Index, m.Length);
+                itemInfoText.SelectionColor = Color.Gold;
             }
         }
 
         public void SetInraidColor()
         {
-            var mc = _inRaidRegex.Matches(iteminfo_text.Text);
+            var mc = _inRaidRegex.Matches(itemInfoText.Text);
             foreach (Match m in mc)
             {
-                iteminfo_text.Select(m.Index, m.Length);
-                iteminfo_text.SelectionColor = Color.Red;
+                itemInfoText.Select(m.Index, m.Length);
+                itemInfoText.SelectionColor = Color.Red;
             }
         }
 
         public void SetCraftColor(Item item)
         {
-            var mc = new Regex(item.NameDisplay).Matches(iteminfo_text.Text);
+            var mc = new Regex(item.NameDisplay).Matches(itemInfoText.Text);
             foreach (Match m in mc)
             {
-                iteminfo_text.Select(m.Index, m.Length);
-                iteminfo_text.SelectionColor = Color.Green;
+                itemInfoText.Select(m.Index, m.Length);
+                itemInfoText.SelectionColor = Color.Green;
             }
         }
 
@@ -242,11 +241,11 @@ namespace TarkovPriceChecker
             {
                 if (!cts_one.IsCancellationRequested)
                 {
-                    iteminfo_ball.Rows.Clear();
-                    iteminfo_ball.Visible = false;
-                    iteminfo_text.Text = _resources["Loading"];
-                    iteminfo_panel.Location = point;
-                    iteminfo_panel.Visible = true;
+                    itemInfoBall.Rows.Clear();
+                    itemInfoBall.Visible = false;
+                    itemInfoText.Text = _resources["Loading"];
+                    itemInfoPanel.Location = point;
+                    itemInfoPanel.Visible = true;
                 }
             };
             Invoke(show);
@@ -258,11 +257,11 @@ namespace TarkovPriceChecker
             {
                 lock (_lock)
                 {
-                    iteminfo_ball.Rows.Clear();
-                    iteminfo_ball.Visible = false;
-                    iteminfo_text.Text = _resources["NotFinishLoading"];
-                    iteminfo_panel.Location = point;
-                    iteminfo_panel.Visible = true;
+                    itemInfoBall.Rows.Clear();
+                    itemInfoBall.Visible = false;
+                    itemInfoText.Text = _resources["NotFinishLoading"];
+                    itemInfoPanel.Location = point;
+                    itemInfoPanel.Visible = true;
                 }
             };
             Invoke(show);
@@ -272,8 +271,8 @@ namespace TarkovPriceChecker
         {
             Action show = delegate ()
             {
-                iteminfo_ball.Visible = false;
-                iteminfo_panel.Visible = false;
+                itemInfoBall.Visible = false;
+                itemInfoPanel.Visible = false;
             };
             Invoke(show);
         }
@@ -315,7 +314,7 @@ namespace TarkovPriceChecker
 
         private void ItemWindowPanelSizeChanged(object sender, EventArgs e)
         {
-            iteminfo_ball.Location = new Point(iteminfo_text.Location.X, iteminfo_text.Location.Y + iteminfo_text.Height + 15);
+            itemInfoBall.Location = new Point(itemInfoText.Location.X, itemInfoText.Location.Y + itemInfoText.Height + 15);
             FixLocation(sender as Control);
         }
 
@@ -327,26 +326,6 @@ namespace TarkovPriceChecker
         private void ItemWindowTextContentsResized(object sender, ContentsResizedEventArgs e)
         {
             (sender as Control).ClientSize = new Size(e.NewRectangle.Width + 1, e.NewRectangle.Height + 1);
-        }
-
-        private void ItemCompareTextMouseMove(object sender, MouseEventArgs e)
-        {
-            if (_isMoving)
-            {
-                itemcompare_panel.Location = new Point(Cursor.Position.X - _x, Cursor.Position.Y - _y);
-            }
-        }
-
-        private void ItemCompareTextMouseDown(object sender, MouseEventArgs e)
-        {
-            _x = Cursor.Position.X - itemcompare_panel.Location.X;
-            _y = Cursor.Position.Y - itemcompare_panel.Location.Y;
-            _isMoving = true;
-        }
-
-        private void ItemCompareTextMouseUp(object sender, MouseEventArgs e)
-        {
-            _isMoving = false;
         }
     }
 }

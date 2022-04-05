@@ -1,4 +1,4 @@
-﻿namespace TarkovPriceViewer
+﻿namespace TarkovPriceViewer.Infrastructure.Entities
 {
     public class Item
     {
@@ -19,7 +19,7 @@
         public string? LastUpdate;
 
         public string? Needs;
-        public string? Bartersandcrafts;
+        public string? BartersNCrafts;
         public string? Type;
         public string? Recoil;
         public string? Accuracy;

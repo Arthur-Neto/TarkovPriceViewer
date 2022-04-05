@@ -6,13 +6,14 @@ using OpenCvSharp.Extensions;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using TarkovPriceViewer;
 using TarkovPriceViewer.Infrastructure.Constants;
+using TarkovPriceViewer.Infrastructure.Entities;
+using TarkovPriceViewer.Infrastructure.Services;
 using TarkovPriceViewer.Infrastructure.Settings;
 using TarkovPriceViewer.Properties;
 using Tesseract;
 
-namespace TarkovPriceChecker
+namespace TarkovPriceViewer.Forms
 {
     public partial class MainForm : Form
     {
@@ -93,6 +94,7 @@ namespace TarkovPriceChecker
         private static InfoOverlay? _overlayInfo = null;
         private static CompareOverlay? _overlayCompare = null;
         private static KeyPressCheck? _keyPressCheck = null;
+
         private static LowLevelProc? _procKeyboard = null;
         private static LowLevelProc? _procMouse = null;
         private static Control? _pressKeyControl = null;
@@ -100,13 +102,19 @@ namespace TarkovPriceChecker
         private static IntPtr _hhookKeyboard = IntPtr.Zero;
         private static IntPtr _hhookMouse = IntPtr.Zero;
 
-        private static System.Drawing.Point _point = new System.Drawing.Point(0, 0);
+        private static readonly HashSet<string> _beType = new HashSet<string> { "Round", "Slug", "Buckshot", "Grenade launcher cartridge" };
 
+        private static System.Drawing.Point _point = new System.Drawing.Point(0, 0);
         private static CancellationTokenSource _cancellationTokenInfo = new CancellationTokenSource();
         private static CancellationTokenSource _cancellationTokenCompare = new CancellationTokenSource();
         private static Scalar _lineColor = new Scalar(90, 89, 82);
         private static long _idleTime = 3600000;
 
+        private List<Item>? _itemList;
+        private Dictionary<string, Ballistic>? _ballisticDic;
+
+        private readonly IBallisticService _ballisticService;
+        private readonly IItemService _itemService;
         private readonly IStringLocalizer<Resources> _resources;
         private readonly ILogger<MainForm> _logger;
         private readonly AppSettings _appSettings;
@@ -115,6 +123,8 @@ namespace TarkovPriceChecker
             InfoOverlay infoOverlay,
             CompareOverlay compareOverlay,
             KeyPressCheck keyPressCheck,
+            IBallisticService ballisticService,
+            IItemService itemService,
             IStringLocalizer<Resources> resources,
             ILogger<MainForm> logger,
             IOptions<AppSettings> options
@@ -130,6 +140,9 @@ namespace TarkovPriceChecker
             }
 
             InitializeComponent();
+
+            _ballisticService = ballisticService;
+            _itemService = itemService;
 
             _keyPressCheck = keyPressCheck;
 
@@ -157,21 +170,21 @@ namespace TarkovPriceChecker
             MinimizetoTrayWhenStartup.Checked = _appSettings.MinimizetoTrayWhenStartup;
             CloseOverlayWhenMouseMoved.Checked = _appSettings.CloseOverlayWhenMouseMoved;
             RandomItem.Checked = _appSettings.RandomItem;
-            last_price_box.Checked = _appSettings.ShowLastPrice;
-            day_price_box.Checked = _appSettings.ShowDayPrice;
-            week_price_box.Checked = _appSettings.ShowWeekPrice;
-            sell_to_trader_box.Checked = _appSettings.SellToTrader;
-            buy_from_trader_box.Checked = _appSettings.BuyFromTrader;
-            needs_box.Checked = _appSettings.Needs;
-            barters_and_crafts_box.Checked = _appSettings.BartersNCrafts;
-            ShowOverlay_Button.Text = ((Keys)int.Parse(_appSettings.ShowOverlayKey)).ToString();
-            HideOverlay_Button.Text = ((Keys)int.Parse(_appSettings.HideOverlayKey)).ToString();
-            CompareOverlay_Button.Text = ((Keys)int.Parse(_appSettings.CompareOverlayKey)).ToString();
-            TransParent_Bar.Value = int.Parse(_appSettings.OverlayTransparency);
-            TransParent_Text.Text = _appSettings.OverlayTransparency;
+            LastPriceChkBox.Checked = _appSettings.ShowLastPrice;
+            DayPriceChkBox.Checked = _appSettings.ShowDayPrice;
+            WeekPriceChkBox.Checked = _appSettings.ShowWeekPrice;
+            SellToTraderChkBox.Checked = _appSettings.SellToTrader;
+            BuyFromTraderChkBox.Checked = _appSettings.BuyFromTrader;
+            NeddsChkBox.Checked = _appSettings.Needs;
+            BartersNCraftsChkBox.Checked = _appSettings.BartersNCrafts;
+            ShowOverlayButton.Text = ((Keys)int.Parse(_appSettings.ShowOverlayKey)).ToString();
+            HideOverlayButton.Text = ((Keys)int.Parse(_appSettings.HideOverlayKey)).ToString();
+            CompareOverlayButton.Text = ((Keys)int.Parse(_appSettings.CompareOverlayKey)).ToString();
+            TransparentBar.Value = int.Parse(_appSettings.OverlayTransparency);
+            TransparentText.Text = _appSettings.OverlayTransparency;
 
             TrayIcon.Visible = true;
-            check_idle_time.Start();
+            checkIdleTime.Start();
         }
 
         private void SetHook()
@@ -249,42 +262,39 @@ namespace TarkovPriceChecker
                 {
                     if (_pressKeyControl == null)
                     {
-                        if (Program.FinishLoadingBallistics)
+                        var vkCode = Marshal.ReadInt32(lParam);
+                        if (vkCode == int.Parse(_appSettings.ShowOverlayKey))
                         {
-                            var vkCode = Marshal.ReadInt32(lParam);
-                            if (vkCode == int.Parse(_appSettings.ShowOverlayKey))
-                            {
-                                var CurrentTime = DateTime.Now.Ticks;
-                                if (CurrentTime - _pressTime > 2000000)
-                                {
-                                    _point = MousePosition;
-                                    LoadingItemInfo();
-                                }
-                                else
-                                {
-                                    Debug.WriteLine("key pressed in 0.2 seconds.");
-                                }
-                                _pressTime = CurrentTime;
-                            }
-                            else if (vkCode == int.Parse(_appSettings.CompareOverlayKey))
+                            var CurrentTime = DateTime.Now.Ticks;
+                            if (CurrentTime - _pressTime > 2000000)
                             {
                                 _point = MousePosition;
-                                LoadingItemCompare();
+                                LoadingItemInfoAsync();
                             }
-                            else if (vkCode == int.Parse(_appSettings.HideOverlayKey)
-                                || vkCode == 9 //tab
-                                || vkCode == 27 //esc
-                            )
+                            else
                             {
-                                CloseItemInfo();
-                                CloseItemCompare();
+                                _logger.LogDebug("key pressed in 0.2 seconds");
                             }
+                            _pressTime = CurrentTime;
                         }
-                        else
+                        else if (vkCode == int.Parse(_appSettings.CompareOverlayKey))
                         {
                             _point = MousePosition;
-                            _overlayInfo?.ShowWaitBallistics(_point);
+                            LoadingItemCompareAsync();
                         }
+                        else if (vkCode == int.Parse(_appSettings.HideOverlayKey)
+                            || vkCode == 9 //tab
+                            || vkCode == 27 //esc
+                        )
+                        {
+                            CloseItemInfo();
+                            CloseItemCompare();
+                        }
+                    }
+                    else
+                    {
+                        _point = MousePosition;
+                        _overlayInfo?.ShowWaitBallistics(_point);
                     }
                 }
             }
@@ -338,16 +348,17 @@ namespace TarkovPriceChecker
             Application.Exit();
         }
 
-        public void LoadingItemInfo()
+        public async void LoadingItemInfoAsync()
         {
             _isInfoClosed = false;
             _cancellationTokenInfo.Cancel();
             _cancellationTokenInfo = new CancellationTokenSource();
             _overlayInfo?.ShowLoadingInfo(_point, _cancellationTokenInfo.Token);
-            var task = Task.Factory.StartNew(() => FindItemTask(true, _cancellationTokenInfo.Token));
+
+            await FindItemTaskAsync(true, _cancellationTokenInfo.Token);
         }
 
-        public void LoadingItemCompare()
+        public async void LoadingItemCompareAsync()
         {
             if (_isCompareClosed)
             {
@@ -357,7 +368,7 @@ namespace TarkovPriceChecker
             }
             _overlayCompare?.ShowLoadingCompare(_point, _cancellationTokenCompare.Token);
 
-            var task = Task.Factory.StartNew(() => FindItemTask(false, _cancellationTokenCompare.Token));
+            await FindItemTaskAsync(false, _cancellationTokenCompare.Token);
         }
 
         public void CloseItemInfo()
@@ -374,15 +385,15 @@ namespace TarkovPriceChecker
             _overlayCompare?.HideCompare();
         }
 
-        private int FindItemTask(bool isiteminfo, CancellationToken cts_one)
+        private Task<int> FindItemTaskAsync(bool isItemInfo, CancellationToken cancellationToken)
         {
             if (_appSettings.RandomItem)
             {
-                if (!cts_one.IsCancellationRequested)
+                if (!cancellationToken.IsCancellationRequested)
                 {
-                    var item = Program.ItemList[new Random().Next(Program.ItemList.Count - 1)];
+                    var item = _itemList[new Random().Next(_itemList.Count - 1)];
 
-                    FindItemInfo(item, isiteminfo, cts_one);
+                    FindItemInfoAsync(item, isItemInfo, cancellationToken);
                 }
             }
             else
@@ -390,22 +401,22 @@ namespace TarkovPriceChecker
                 var fullimage = CaptureScreen(CheckIsTarkov());
                 if (fullimage != null)
                 {
-                    if (!cts_one.IsCancellationRequested)
+                    if (!cancellationToken.IsCancellationRequested)
                     {
-                        FindItem(fullimage, isiteminfo, cts_one);
+                        FindItem(fullimage, isItemInfo, cancellationToken);
                     }
                 }
                 else
                 {
-                    if (!cts_one.IsCancellationRequested)
+                    if (!cancellationToken.IsCancellationRequested)
                     {
-                        if (isiteminfo)
+                        if (isItemInfo)
                         {
-                            _overlayInfo?.ShowInfo(null, cts_one);
+                            _overlayInfo?.ShowInfo(null, cancellationToken);
                         }
                         else
                         {
-                            _overlayCompare?.ShowCompare(null, cts_one);
+                            _overlayCompare?.ShowCompare(null, cancellationToken);
                         }
                     }
 
@@ -413,7 +424,7 @@ namespace TarkovPriceChecker
                 }
             }
 
-            return 0;
+            return Task.FromResult(0);
         }
 
         private IntPtr CheckIsTarkov()
@@ -459,14 +470,14 @@ namespace TarkovPriceChecker
             }
         }
 
-        private string GetTesseract(Mat textmat)
+        private string GetTesseract(Mat textMat)
         {
             var text = "";
             try
             {
                 using var ocr = new TesseractEngine(@"./Resources/tessdata", "eng", EngineMode.Default); //should use once
-                using var temp = BitmapConverter.ToBitmap(textmat);
-                using var texts = ocr.Process(Pix.LoadFromMemory(ImageToByte(temp)));
+                using var textMatToBitmap = BitmapConverter.ToBitmap(textMat);
+                using var texts = ocr.Process(Pix.LoadFromMemory(ImageToByte(textMatToBitmap)));
                 text = texts.GetText().Replace("\n", " ").Split(Currencies.AllCurrencies)[0].Trim();
 
                 _logger.LogDebug("GetTesseract Text: {TesseractText}", text);
@@ -485,17 +496,17 @@ namespace TarkovPriceChecker
             return (byte[]?)converter.ConvertTo(img, typeof(byte[]));
         }
 
-        private void FindItem(Bitmap fullimage, bool isiteminfo, CancellationToken cts_one)
+        private void FindItem(Bitmap fullImage, bool isItemInfo, CancellationToken cancellationToken)
         {
             var item = new Item();
-            using (var ScreenMat_original = BitmapConverter.ToMat(fullimage))
+            using (var ScreenMat_original = BitmapConverter.ToMat(fullImage))
             using (var ScreenMat = ScreenMat_original.CvtColor(ColorConversionCodes.BGRA2BGR))
             using (var rac_img = ScreenMat.InRange(_lineColor, _lineColor))
             {
                 rac_img.FindContours(out var contours, out var hierarchy, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
                 foreach (var contour in contours)
                 {
-                    if (!cts_one.IsCancellationRequested)
+                    if (!cancellationToken.IsCancellationRequested)
                     {
                         var rect2 = Cv2.BoundingRect(contour);
                         if (rect2.Width > 5 && rect2.Height > 10)
@@ -512,19 +523,19 @@ namespace TarkovPriceChecker
                         }
                     }
                 }
-                if (!cts_one.IsCancellationRequested)
+                if (!cancellationToken.IsCancellationRequested)
                 {
-                    FindItemInfo(item, isiteminfo, cts_one);
+                    FindItemInfoAsync(item, isItemInfo, cancellationToken);
                 }
             }
-            fullimage.Dispose();
+            fullImage.Dispose();
         }
 
         private Item MatchItemName(char[] itemName)
         {
             var result = new Item();
             var distance = 999;
-            foreach (var item in Program.ItemList)
+            foreach (var item in _itemList)
             {
                 var levenshteinDistance = LevenshteinDistance(itemName, item.NameCompare);
                 if (levenshteinDistance < distance)
@@ -610,7 +621,7 @@ namespace TarkovPriceChecker
             return d[m - 1, n - 1];
         }
 
-        private void FindItemInfo(Item item, bool isiteminfo, CancellationToken cts_one)
+        private async void FindItemInfoAsync(Item item, bool isItemInfo, CancellationToken cancellationToken)
         {
             if (item.MarketAddress != null)
             {
@@ -621,76 +632,76 @@ namespace TarkovPriceChecker
                         var doc = new HtmlAgilityPack.HtmlDocument();
 
                         using var httpClient = new HttpClient();
-                        using (var response = httpClient.GetAsync($"{Links.TARKOV_MARKET}{item.MarketAddress}").ConfigureAwait(false).GetAwaiter().GetResult())
+                        using (var response = await httpClient.GetAsync($"{Links.TARKOV_MARKET}{item.MarketAddress}"))
                         {
                             using var content = response.Content;
-                            var json = content.ReadAsStringAsync().Result;
+                            var json = await content.ReadAsStringAsync(cancellationToken);
 
                             doc.LoadHtml(json);
                         }
 
-                        var node_tm = doc.DocumentNode.SelectSingleNode("//div[@class='market-data']");
-                        HtmlAgilityPack.HtmlNode? sub_node_tm = null;
-                        HtmlAgilityPack.HtmlNode? sub_node_tm2 = null;
+                        var nodeTm = doc.DocumentNode.SelectSingleNode("//div[@class='market-data']");
+                        HtmlAgilityPack.HtmlNode? subNodeTm = null;
+                        HtmlAgilityPack.HtmlNode? subNodeTm2 = null;
                         HtmlAgilityPack.HtmlNodeCollection? nodes = null;
-                        HtmlAgilityPack.HtmlNodeCollection? subnodes = null;
-                        HtmlAgilityPack.HtmlNodeCollection? subnodes2 = null;
-                        if (node_tm != null)
+                        HtmlAgilityPack.HtmlNodeCollection? subNodes = null;
+                        HtmlAgilityPack.HtmlNodeCollection? subNodes2 = null;
+                        if (nodeTm != null)
                         {
-                            nodes = node_tm.SelectNodes(".//div[@class='w-25']");
-                            sub_node_tm = node_tm.SelectSingleNode(".//div[@class='sub']");
-                            if (sub_node_tm != null)
+                            nodes = nodeTm.SelectNodes(".//div[@class='w-25']");
+                            subNodeTm = nodeTm.SelectSingleNode(".//div[@class='sub']");
+                            if (subNodeTm != null)
                             {
-                                item.LastUpdate = sub_node_tm.InnerText.Trim();
+                                item.LastUpdate = subNodeTm.InnerText.Trim();
                             }
                             if (nodes != null)
                             {
                                 foreach (var node in nodes)
                                 {
-                                    sub_node_tm = node.FirstChild;
-                                    if (sub_node_tm != null)
+                                    subNodeTm = node.FirstChild;
+                                    if (subNodeTm != null)
                                     {
-                                        if (sub_node_tm.InnerText.Trim().Contains("Flea price"))
+                                        if (subNodeTm.InnerText.Trim().Contains("Flea price"))
                                         {
-                                            sub_node_tm = node.SelectSingleNode(".//div[@class='big bold alt']");
-                                            if (sub_node_tm != null)
+                                            subNodeTm = node.SelectSingleNode(".//div[@class='big bold alt']");
+                                            if (subNodeTm != null)
                                             {
-                                                item.PriceLast = sub_node_tm.InnerText.Trim();
+                                                item.PriceLast = subNodeTm.InnerText.Trim();
                                             }
                                         }
-                                        else if (sub_node_tm.InnerText.Trim().Contains("Average price"))
+                                        else if (subNodeTm.InnerText.Trim().Contains("Average price"))
                                         {
-                                            subnodes = node.SelectNodes(".//span[@class='bold alt']");
-                                            if (subnodes != null && subnodes.Count >= 2)
+                                            subNodes = node.SelectNodes(".//span[@class='bold alt']");
+                                            if (subNodes != null && subNodes.Count >= 2)
                                             {
-                                                item.PriceDay = subnodes[0].InnerText.Trim();
-                                                item.PriceWeek = subnodes[1].InnerText.Trim();
+                                                item.PriceDay = subNodes[0].InnerText.Trim();
+                                                item.PriceWeek = subNodes[1].InnerText.Trim();
                                             }
                                         }
                                         else
                                         {
-                                            sub_node_tm2 = sub_node_tm.SelectSingleNode(".//div[@class='bold']");
-                                            if (sub_node_tm2 != null)
+                                            subNodeTm2 = subNodeTm.SelectSingleNode(".//div[@class='bold']");
+                                            if (subNodeTm2 != null)
                                             {
-                                                var temp = sub_node_tm.InnerText.Trim().Split(' ');
+                                                var temp = subNodeTm.InnerText.Trim().Split(' ');
                                                 if (temp.Length > 2)
                                                 {
-                                                    if (sub_node_tm.InnerText.Trim().Contains("LL"))
+                                                    if (subNodeTm.InnerText.Trim().Contains("LL"))
                                                     {
                                                         item.BuyFromTrader = temp[0].Trim() + " " + temp[1];
-                                                        sub_node_tm = node.SelectSingleNode(".//div[@class='bold alt']");
-                                                        if (sub_node_tm != null)
+                                                        subNodeTm = node.SelectSingleNode(".//div[@class='bold alt']");
+                                                        if (subNodeTm != null)
                                                         {
-                                                            item.BuyFromTraderPrice = sub_node_tm.InnerText.Trim();
+                                                            item.BuyFromTraderPrice = subNodeTm.InnerText.Trim();
                                                         }
                                                     }
                                                     else
                                                     {
                                                         item.SellToTrader = temp[0].Trim();
-                                                        sub_node_tm = node.SelectSingleNode(".//div[@class='bold alt']");
-                                                        if (sub_node_tm != null)
+                                                        subNodeTm = node.SelectSingleNode(".//div[@class='bold alt']");
+                                                        if (subNodeTm != null)
                                                         {
-                                                            item.SellToTraderPrice = sub_node_tm.InnerText.Trim();
+                                                            item.SellToTraderPrice = subNodeTm.InnerText.Trim();
                                                         }
                                                     }
                                                 }
@@ -701,27 +712,27 @@ namespace TarkovPriceChecker
                             }
                         }
 
-                        if (isiteminfo)
+                        if (isItemInfo)
                         {
-                            _overlayInfo?.ShowInfo(item, cts_one);
+                            _overlayInfo?.ShowInfo(item, cancellationToken);
                         }
                         else
                         {
-                            _overlayCompare?.ShowCompare(item, cts_one);
+                            _overlayCompare?.ShowCompare(item, cancellationToken);
                         }
 
-                        var isdisconnected = false;
+                        var isDisconnected = false;
                         do
                         {
-                            isdisconnected = false;
+                            isDisconnected = false;
                             try
                             {
                                 _logger.LogDebug("Search for item info on Wiki {WikiAddress}", $"{Links.WIKI}{item.WikiAddress}");
                                 try
                                 {
-                                    using var response = httpClient.GetAsync($"{Links.WIKI}{item.WikiAddress}").ConfigureAwait(false).GetAwaiter().GetResult();
+                                    using var response = await httpClient.GetAsync($"{Links.WIKI}{item.WikiAddress}");
                                     using var content = response.Content;
-                                    var json = content.ReadAsStringAsync().Result;
+                                    var json = await content.ReadAsStringAsync();
 
                                     doc.LoadHtml(json);
                                 }
@@ -729,20 +740,18 @@ namespace TarkovPriceChecker
                                 {
                                     _logger.LogError(ex, "Not found, searching in new link {WikiAddressNameDisplay2}", $"{Links.WIKI}{item.NameDisplay2.Replace(" ", "_")}");
 
-                                    Debug.WriteLine(ex.Message);
-
-                                    using var response = httpClient.GetAsync($"{Links.WIKI}{ item.NameDisplay2.Replace(" ", "_")}").ConfigureAwait(false).GetAwaiter().GetResult();
+                                    using var response = await httpClient.GetAsync($"{Links.WIKI}{ item.NameDisplay2.Replace(" ", "_")}");
                                     using var content = response.Content;
-                                    var json = content.ReadAsStringAsync().Result;
+                                    var json = await content.ReadAsStringAsync(cancellationToken);
 
                                     doc.LoadHtml(json);
                                 }
 
-                                node_tm = doc.DocumentNode.SelectSingleNode("//div[@class='mw-parser-output']");
-                                if (node_tm != null)
+                                nodeTm = doc.DocumentNode.SelectSingleNode("//div[@class='mw-parser-output']");
+                                if (nodeTm != null)
                                 {
                                     var sb = new StringBuilder();
-                                    nodes = node_tm.SelectNodes(".//li");
+                                    nodes = nodeTm.SelectNodes(".//li");
                                     if (nodes != null)
                                     {
                                         foreach (var node in nodes)
@@ -753,33 +762,33 @@ namespace TarkovPriceChecker
                                             }
                                         }
                                     }
-                                    sub_node_tm = node_tm.SelectSingleNode(".//td[@class='va-infobox-cont']");
-                                    if (sub_node_tm != null)
+                                    subNodeTm = nodeTm.SelectSingleNode(".//td[@class='va-infobox-cont']");
+                                    if (subNodeTm != null)
                                     {
-                                        nodes = sub_node_tm.SelectNodes(".//table[@class='va-infobox-group']");
+                                        nodes = subNodeTm.SelectNodes(".//table[@class='va-infobox-group']");
                                         if (nodes != null)
                                         {
                                             foreach (var node in nodes)
                                             {
-                                                var temp_node = node.SelectSingleNode(".//th[@class='va-infobox-header']");
-                                                if (temp_node != null)
+                                                var tempNode = node.SelectSingleNode(".//th[@class='va-infobox-header']");
+                                                if (tempNode != null)
                                                 {
-                                                    if (temp_node.InnerText.Trim().Equals("General data"))
+                                                    if (tempNode.InnerText.Trim().Equals("General data"))
                                                     {
-                                                        var temp_node_list = sub_node_tm.SelectNodes(".//td[@class='va-infobox-label']");
-                                                        var temp_node_list2 = sub_node_tm.SelectNodes(".//td[@class='va-infobox-content']");
-                                                        if (temp_node_list != null && temp_node_list2 != null && temp_node_list.Count == temp_node_list2.Count)
+                                                        var tempNodeList = subNodeTm.SelectNodes(".//td[@class='va-infobox-label']");
+                                                        var tempNodeList2 = subNodeTm.SelectNodes(".//td[@class='va-infobox-content']");
+                                                        if (tempNodeList != null && tempNodeList2 != null && tempNodeList.Count == tempNodeList2.Count)
                                                         {
-                                                            for (var n = 0; n < temp_node_list.Count; n++)
+                                                            for (var n = 0; n < tempNodeList.Count; n++)
                                                             {
-                                                                if (temp_node_list[n].InnerText.Trim().Contains("Type"))
+                                                                if (tempNodeList[n].InnerText.Trim().Contains("Type"))
                                                                 {
-                                                                    item.Type = temp_node_list2[n].InnerText.Trim();
-                                                                    if (Program.BEType.Contains(item.Type))
+                                                                    item.Type = tempNodeList2[n].InnerText.Trim();
+                                                                    if (_beType.Contains(item.Type))
                                                                     {
-                                                                        if (!Program.DicBallistic.TryGetValue(item.NameDisplay, out item.Ballistic))
+                                                                        if (!_ballisticDic.TryGetValue(item.NameDisplay, out item.Ballistic))
                                                                         {
-                                                                            Program.DicBallistic.TryGetValue(item.NameDisplay2, out item.Ballistic);
+                                                                            _ballisticDic.TryGetValue(item.NameDisplay2, out item.Ballistic);
                                                                         }
                                                                     }
                                                                     break;
@@ -787,40 +796,40 @@ namespace TarkovPriceChecker
                                                             }
                                                         }
                                                     }
-                                                    else if (temp_node.InnerText.Trim().Equals("Performance"))
+                                                    else if (tempNode.InnerText.Trim().Equals("Performance"))
                                                     {
-                                                        var temp_node_list = sub_node_tm.SelectNodes(".//td[@class='va-infobox-label']");
-                                                        var temp_node_list2 = sub_node_tm.SelectNodes(".//td[@class='va-infobox-content']");
-                                                        if (temp_node_list != null && temp_node_list2 != null && temp_node_list.Count == temp_node_list2.Count)
+                                                        var tempNodeList = subNodeTm.SelectNodes(".//td[@class='va-infobox-label']");
+                                                        var tempNodeList2 = subNodeTm.SelectNodes(".//td[@class='va-infobox-content']");
+                                                        if (tempNodeList != null && tempNodeList2 != null && tempNodeList.Count == tempNodeList2.Count)
                                                         {
-                                                            for (var n = 0; n < temp_node_list.Count; n++)
+                                                            for (var n = 0; n < tempNodeList.Count; n++)
                                                             {
-                                                                if (temp_node_list[n].InnerText.Trim().Contains("Recoil"))
+                                                                if (tempNodeList[n].InnerText.Trim().Contains("Recoil"))
                                                                 {
-                                                                    item.Recoil = temp_node_list2[n].InnerText.Trim();
+                                                                    item.Recoil = tempNodeList2[n].InnerText.Trim();
                                                                 }
-                                                                else if (temp_node_list[n].InnerText.Trim().Contains("Ergonomics"))
+                                                                else if (tempNodeList[n].InnerText.Trim().Contains("Ergonomics"))
                                                                 {
-                                                                    item.Ergo = temp_node_list2[n].InnerText.Trim();
+                                                                    item.Ergo = tempNodeList2[n].InnerText.Trim();
                                                                 }
-                                                                else if (temp_node_list[n].InnerText.Trim().Contains("Accuracy"))
+                                                                else if (tempNodeList[n].InnerText.Trim().Contains("Accuracy"))
                                                                 {
-                                                                    item.Accuracy = temp_node_list2[n].InnerText.Trim();
+                                                                    item.Accuracy = tempNodeList2[n].InnerText.Trim();
                                                                 }
                                                             }
                                                         }
                                                     }
-                                                    else if (temp_node.InnerText.Trim().Equals("Ammunition"))
+                                                    else if (tempNode.InnerText.Trim().Equals("Ammunition"))
                                                     {
-                                                        var temp_node_list = sub_node_tm.SelectNodes(".//td[@class='va-infobox-label']");
-                                                        var temp_node_list2 = sub_node_tm.SelectNodes(".//td[@class='va-infobox-content']");
-                                                        if (temp_node_list != null && temp_node_list2 != null && temp_node_list.Count == temp_node_list2.Count)
+                                                        var tempNodeList = subNodeTm.SelectNodes(".//td[@class='va-infobox-label']");
+                                                        var tempNodeList2 = subNodeTm.SelectNodes(".//td[@class='va-infobox-content']");
+                                                        if (tempNodeList != null && tempNodeList2 != null && tempNodeList.Count == tempNodeList2.Count)
                                                         {
-                                                            for (var n = 0; n < temp_node_list.Count; n++)
+                                                            for (var n = 0; n < tempNodeList.Count; n++)
                                                             {
-                                                                if (temp_node_list[n].InnerText.Trim().Contains("Default ammo"))
+                                                                if (tempNodeList[n].InnerText.Trim().Contains("Default ammo"))
                                                                 {
-                                                                    Program.DicBallistic.TryGetValue(temp_node_list2[n].InnerText.Trim(), out item.Ballistic);
+                                                                    _ballisticDic.TryGetValue(tempNodeList2[n].InnerText.Trim(), out item.Ballistic);
                                                                     break;
                                                                 }
                                                             }
@@ -831,55 +840,60 @@ namespace TarkovPriceChecker
                                         }
                                     }
 
-                                    nodes = node_tm.SelectNodes(".//table[@class='wikitable']");
+                                    nodes = nodeTm.SelectNodes(".//table[@class='wikitable']");
                                     if (nodes != null)
                                     {
                                         var craftsb = new StringBuilder();
                                         foreach (var node in nodes)
                                         {
-                                            subnodes = node.SelectNodes(".//tr");
-                                            if (subnodes != null)
+                                            subNodes = node.SelectNodes(".//tr");
+                                            if (subNodes != null)
                                             {
-                                                foreach (var node2 in subnodes)
+                                                foreach (var node2 in subNodes)
                                                 {
-                                                    subnodes2 = node2.SelectNodes(".//th");
-                                                    if (subnodes2 != null && subnodes2.Count >= 5)
+                                                    subNodes2 = node2.SelectNodes(".//th");
+                                                    if (subNodes2 != null && subNodes2.Count >= 5)
                                                     {
-                                                        var craftlist = new List<string>();
-                                                        foreach (var temp in subnodes2)
+                                                        var craftList = new List<string>();
+                                                        foreach (var temp in subNodes2)
                                                         {
                                                             foreach (var temp2 in temp.ChildNodes)
                                                             {
                                                                 if (!temp2.InnerText.Trim().Equals(""))
                                                                 {
-                                                                    craftlist.Add(temp2.InnerText.Trim());
+                                                                    craftList.Add(temp2.InnerText.Trim());
                                                                 }
                                                             }
                                                         }
 
-                                                        var firstarrow = craftlist.IndexOf("→");
-                                                        var secondarrow = craftlist.LastIndexOf("→");
-                                                        var firstlist = craftlist.GetRange(0, firstarrow);
-                                                        var secondlist = craftlist.GetRange(firstarrow + 1, secondarrow - firstarrow - 1);
-                                                        var thirdlist = craftlist.GetRange(secondarrow + 1, craftlist.Count - secondarrow - 1);
-                                                        firstlist.Reverse();
-                                                        if (secondlist.Count <= 2)
+                                                        var firstArrow = craftList.IndexOf("→");
+                                                        var secondArrow = craftList.LastIndexOf("→");
+                                                        var firstList = craftList.GetRange(0, firstArrow);
+                                                        var secondList = craftList.GetRange(firstArrow + 1, secondArrow - firstArrow - 1);
+                                                        var thirdList = craftList.GetRange(secondArrow + 1, craftList.Count - secondArrow - 1);
+
+                                                        firstList.Reverse();
+                                                        if (secondList.Count <= 2)
                                                         {
-                                                            secondlist.Reverse();
+                                                            secondList.Reverse();
                                                         }
-                                                        thirdlist.Reverse();
-                                                        craftsb.Append(string.Format("{0} → {2} ({1})"
-                                                            , string.Join(" ", firstlist), string.Join(secondlist.Count <= 2 ? " in " : " ", secondlist), string.Join(" ", thirdlist))).Append("\n");
+                                                        thirdList.Reverse();
+                                                        craftsb.Append(
+                                                                    string.Format("{0} → {2} ({1})",
+                                                                    string.Join(" ", firstList),
+                                                                    string.Join(secondList.Count <= 2 ? " in " : " ", secondList),
+                                                                    string.Join(" ", thirdList)))
+                                                               .Append("\n");
                                                     }
                                                 }
                                             }
                                         }
-                                        if (!craftsb.ToString().Trim().Equals(""))
+                                        if (craftsb.ToString().Trim().Equals(string.Empty) is false)
                                         {
-                                            item.Bartersandcrafts = craftsb.ToString().Trim();
+                                            item.BartersNCrafts = craftsb.ToString().Trim();
                                         }
                                     }
-                                    if (!sb.ToString().Trim().Equals(""))
+                                    if (sb.ToString().Trim().Equals(string.Empty) is false)
                                     {
                                         item.Needs = sb.ToString().Trim();
                                     }
@@ -887,10 +901,10 @@ namespace TarkovPriceChecker
                             }
                             catch (Exception ex)
                             {
-                                isdisconnected = true;
+                                isDisconnected = true;
                                 _logger.LogError(ex, "Exception on searching, wiki reconnected...");
                             }
-                        } while (!cts_one.IsCancellationRequested && isdisconnected);
+                        } while (cancellationToken.IsCancellationRequested is false && isDisconnected);
                     }
                     item.LastFetch = DateTime.Now;
                 }
@@ -900,13 +914,13 @@ namespace TarkovPriceChecker
                 }
             }
 
-            if (isiteminfo)
+            if (isItemInfo)
             {
-                _overlayInfo?.ShowInfo(item, cts_one);
+                _overlayInfo?.ShowInfo(item, cancellationToken);
             }
             else
             {
-                _overlayCompare?.ShowCompare(item, cts_one);
+                _overlayCompare?.ShowCompare(item, cancellationToken);
             }
         }
 
@@ -945,7 +959,7 @@ namespace TarkovPriceChecker
             //Program.Settings["MinimizetoTrayWhenStartup"] = (sender as CheckBox).Checked.ToString();
         }
 
-        private void Tarkov_Official_Click(object sender, EventArgs e)
+        private void TarkovOfficialClick(object sender, EventArgs e)
         {
             var psi = new ProcessStartInfo
             {
@@ -1004,15 +1018,15 @@ namespace TarkovPriceChecker
         {
             _pressKeyControl = (sender as Control);
             _keyPressCheck.Button = 0;
-            if (_pressKeyControl == ShowOverlay_Button)
+            if (_pressKeyControl == ShowOverlayButton)
             {
                 _keyPressCheck.Button = 1;
             }
-            else if (_pressKeyControl == HideOverlay_Button)
+            else if (_pressKeyControl == HideOverlayButton)
             {
                 _keyPressCheck.Button = 2;
             }
-            else if (_pressKeyControl == CompareOverlay_Button)
+            else if (_pressKeyControl == CompareOverlayButton)
             {
                 _keyPressCheck.Button = 3;
             }
@@ -1026,7 +1040,7 @@ namespace TarkovPriceChecker
         {
             var tb = (sender as TrackBar);
             //Program.Settings["Overlay_Transparent"] = tb.Value.ToString();
-            TransParent_Text.Text = $"{_appSettings.OverlayTransparency}%";
+            TransparentText.Text = $"{_appSettings.OverlayTransparency}%";
             _overlayInfo?.ChangeTransparent(tb.Value);
         }
 
@@ -1040,24 +1054,24 @@ namespace TarkovPriceChecker
             Process.Start(psi);
         }
 
-        private void CheckUpdate_Click(object sender, EventArgs e)
+        private async void CheckUpdateClick(object sender, EventArgs e)
         {
             (sender as Control).Enabled = false;
-            Task task = Task.Factory.StartNew(() => UpdateTask(sender as Control));
+            await UpdateTaskAsync(sender as Control);
         }
 
-        private int UpdateTask(Control control)
+        private async Task<int> UpdateTaskAsync(Control control)
         {
             try
             {
                 var check = string.Empty;
                 using var httpClient = new HttpClient();
-                using (var response = httpClient.GetAsync($"{Links.GITHUB_REPO}").ConfigureAwait(false).GetAwaiter().GetResult())
+                using (var response = await httpClient.GetAsync($"{Links.GITHUB_REPO}"))
                 {
                     using var content = response.Content;
-                    check = content.ReadAsStringAsync().Result;
+                    check = await content.ReadAsStringAsync();
                 }
-                if (!check.Equals(""))
+                if (check.Equals(string.Empty) is false)
                 {
                     var sp = check.Split('\n')[0];
                     if (sp.Contains("Tarkov Price Viewer"))
@@ -1079,7 +1093,6 @@ namespace TarkovPriceChecker
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception on checking for updates...");
-                Debug.WriteLine(ex.Message);
             }
 
             Action show = delegate ()
@@ -1156,6 +1169,12 @@ namespace TarkovPriceChecker
         private void RefreshBClick(object sender, EventArgs e)
         {
             SetHook(true);
+        }
+
+        private async void MainFormLoad(object sender, EventArgs e)
+        {
+            _itemList = await _itemService.GetItemListAsync();
+            _ballisticDic = await _ballisticService.GetBallisticsAsync();
         }
     }
 }

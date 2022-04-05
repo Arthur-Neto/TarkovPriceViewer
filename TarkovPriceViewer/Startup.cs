@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 using System.Reflection;
-using TarkovPriceChecker;
+using TarkovPriceViewer.Forms;
 using TarkovPriceViewer.Infrastructure.Settings;
 
 namespace TarkovPriceViewer
@@ -36,10 +36,6 @@ namespace TarkovPriceViewer
 
             ThreadPool.SetMinThreads(10, 10);
             ThreadPool.SetMaxThreads(20, 20);
-
-            var task = Task.Factory.StartNew(() => Program.GetBallistics());
-
-            Program.GetItemList();
 
             var services = new ServiceCollection();
 

@@ -2,11 +2,11 @@
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using TarkovPriceViewer;
 using TarkovPriceViewer.Infrastructure.Constants;
+using TarkovPriceViewer.Infrastructure.Entities;
 using TarkovPriceViewer.Properties;
 
-namespace TarkovPriceChecker
+namespace TarkovPriceViewer.Forms
 {
     public partial class CompareOverlay : Form
     {
@@ -46,10 +46,8 @@ namespace TarkovPriceChecker
 
             SettingFormPos();
             InitializeCompareData();
-            InitializeBallistics();
 
-            iteminfo_panel.Visible = false;
-            itemcompare_panel.Visible = false;
+            ItemComparePanel.Visible = false;
         }
 
         public void SettingFormPos()
@@ -74,23 +72,6 @@ namespace TarkovPriceChecker
             ResizeGrid(ItemCompareGrid);
         }
 
-        public void InitializeBallistics()
-        {
-            iteminfo_ball.ColumnCount = 9;
-            iteminfo_ball.Columns[0].Name = "Type";
-            iteminfo_ball.Columns[1].Name = "Name";
-            iteminfo_ball.Columns[2].Name = "Damage";
-            iteminfo_ball.Columns[3].Name = "1";
-            iteminfo_ball.Columns[4].Name = "2";
-            iteminfo_ball.Columns[5].Name = "3";
-            iteminfo_ball.Columns[6].Name = "4";
-            iteminfo_ball.Columns[7].Name = "5";
-            iteminfo_ball.Columns[8].Name = "6";
-            iteminfo_ball.Visible = false;
-            iteminfo_ball.ClearSelection();
-            ResizeGrid(iteminfo_ball);
-        }
-
         private void ItemCompareGridSortCompare(object sender, DataGridViewSortCompareEventArgs e)
         {
             if (e.Column.Index is 0 or 5 or 6)
@@ -111,11 +92,11 @@ namespace TarkovPriceChecker
             view.Refresh();
         }
 
-        public void ShowCompare(Item item, CancellationToken cts_one)
+        public void ShowCompare(Item item, CancellationToken cancellationToken)
         {
             Action show = delegate ()
             {
-                if (!cts_one.IsCancellationRequested)
+                if (cancellationToken.IsCancellationRequested is false)
                 {
                     lock (_lock)
                     {
@@ -166,21 +147,21 @@ namespace TarkovPriceChecker
             return value;
         }
 
-        public void ShowLoadingCompare(Point point, CancellationToken cts_one)
+        public void ShowLoadingCompare(Point point, CancellationToken cancellationToken)
         {
             Action show = delegate ()
             {
-                if (!cts_one.IsCancellationRequested)
+                if (cancellationToken.IsCancellationRequested is false)
                 {
                     lock (_lock)
                     {
-                        if (!itemcompare_panel.Visible)
+                        if (!ItemComparePanel.Visible)
                         {
                             _compareSize = 0;
                             ItemCompareGrid.Rows.Clear();
                             ResizeGrid(ItemCompareGrid);
-                            itemcompare_panel.Location = point;
-                            itemcompare_panel.Visible = true;
+                            ItemComparePanel.Location = point;
+                            ItemComparePanel.Visible = true;
                             itemcompare_text.Text = string.Format("{0}", _resources["PressCompareKey"]);
                         }
 
@@ -196,7 +177,7 @@ namespace TarkovPriceChecker
             Action show = delegate ()
             {
                 ItemCompareGrid.Visible = false;
-                itemcompare_panel.Visible = false;
+                ItemComparePanel.Visible = false;
             };
             Invoke(show);
         }
@@ -229,7 +210,6 @@ namespace TarkovPriceChecker
 
         private void ItemWindowPanelSizeChanged(object sender, EventArgs e)
         {
-            iteminfo_ball.Location = new Point(iteminfo_text.Location.X, iteminfo_text.Location.Y + iteminfo_text.Height + 15);
             FixLocation(sender as Control);
         }
 
@@ -247,14 +227,14 @@ namespace TarkovPriceChecker
         {
             if (_isMoving)
             {
-                itemcompare_panel.Location = new Point(Cursor.Position.X - _x, Cursor.Position.Y - _y);
+                ItemComparePanel.Location = new Point(Cursor.Position.X - _x, Cursor.Position.Y - _y);
             }
         }
 
         private void ItemCompareTextMouseDown(object sender, MouseEventArgs e)
         {
-            _x = Cursor.Position.X - itemcompare_panel.Location.X;
-            _y = Cursor.Position.Y - itemcompare_panel.Location.Y;
+            _x = Cursor.Position.X - ItemComparePanel.Location.X;
+            _y = Cursor.Position.Y - ItemComparePanel.Location.Y;
             _isMoving = true;
         }
 

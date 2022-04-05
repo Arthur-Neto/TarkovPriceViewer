@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using TarkovPriceViewer.Infrastructure.Settings;
 
-namespace TarkovPriceChecker
+namespace TarkovPriceViewer.Forms
 {
     public partial class KeyPressCheck : Form
     {
