@@ -6,11 +6,11 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <ApplicationIcon>tpv.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\tpv.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="tpv.ico" />
+    <Content Include="Resources\tpv.ico" />
   </ItemGroup>
 
   <ItemGroup>
