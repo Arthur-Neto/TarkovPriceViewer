@@ -31,7 +31,10 @@ namespace TarkovPriceViewer.Infrastructure.JsonWriter
         }
 
         public T Value => _options.CurrentValue;
-        public T Get(string name) => _options.Get(name);
+        public T Get(string name)
+        {
+            return _options.Get(name);
+        }
 
         public void Update(Action<T> applyChanges)
         {
@@ -40,7 +43,7 @@ namespace TarkovPriceViewer.Infrastructure.JsonWriter
             var physicalPath = fileInfo.PhysicalPath;
 
             var jObject = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(physicalPath));
-            var sectionObject = jObject.TryGetValue(_section, out JToken section) ?
+            var sectionObject = jObject.TryGetValue(_section, out var section) ?
                 JsonConvert.DeserializeObject<T>(section.ToString()) : (Value ?? new T());
 
             applyChanges(sectionObject);

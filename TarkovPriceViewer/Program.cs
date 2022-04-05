@@ -39,8 +39,9 @@ namespace TarkovPriceViewer
                 .Run();
         }
 
-        private static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
+        private static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
                 .UseWindowsFormsLifetime<MainForm>(options =>
                 {
                     options.HighDpiMode = HighDpiMode.SystemAware;
@@ -53,5 +54,6 @@ namespace TarkovPriceViewer
                 {
                     services.ConfigureServices();
                 });
+        }
     }
 }

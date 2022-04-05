@@ -1,4 +1,4 @@
-# <img width="36" align="center" src="https://user-images.githubusercontent.com/32073152/126047438-2f1b7e59-ca31-43f2-bcf6-00b2f00e408c.png"/> Tarkov Price Viewer v1.16
+# <img width="36" align="center" src="https://user-images.githubusercontent.com/32073152/126047438-2f1b7e59-ca31-43f2-bcf6-00b2f00e408c.png"/> Tarkov Price Viewer v2.0.0
 This program is for newbies. It is especially good to find out the market price in advance when the flea market is not open yet. Currently, only English is available.
 
 Most of the information for this program (names, prices, wiki links, etc.) was provided by the Tarkov Market, and some information (Needs, etc.) was provided by the Tarkov Wiki.
@@ -22,7 +22,7 @@ Ballistics is added since Version 1.08.
 You can set some values for the functions.
 </br>
 </br>
-If you got errors, please check you installed .NET Framework 4.7.2 (https://dotnet.microsoft.com/download/dotnet-framework/net472).
+If you got errors, please check you installed .NET 6 (https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
 
 # Notice - User
 1. It cannot be used in full screen. Borderless windowed mode is recommended.
