@@ -1,5 +1,4 @@
-﻿
-namespace TarkovPriceChecker
+﻿namespace TarkovPriceChecker
 {
     partial class MainForm
     {

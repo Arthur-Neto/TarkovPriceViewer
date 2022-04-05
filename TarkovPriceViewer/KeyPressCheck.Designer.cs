@@ -55,7 +55,7 @@ namespace TarkovPriceChecker
             this.Name = "KeyPressCheck";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Form1";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.KeyPressCheck_FormClosed);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.KeyPressCheckFormClosed);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.KeyPressCheck_KeyUp);
             this.ResumeLayout(false);
             this.PerformLayout();

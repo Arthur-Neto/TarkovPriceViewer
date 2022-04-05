@@ -1,90 +1,49 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using TarkovPriceChecker;
+using TarkovPriceViewer.Extensions;
+using TarkovPriceViewer.Infrastructure.Constants;
 
 namespace TarkovPriceViewer
 {
     public static class Program
     {
+        public static bool FinishLoadingBallistics = false;
+
         public static Dictionary<string, string> Settings = new Dictionary<string, string>();
         public static readonly List<Item> ItemList = new List<Item>();
         public static readonly Dictionary<string, Ballistic> DicBallistic = new Dictionary<string, Ballistic>();
-        public static readonly Color[] BEColor = new Color[] {
-            ColorTranslator.FromHtml("#B32425"),
-            ColorTranslator.FromHtml("#DD3333"),
-            ColorTranslator.FromHtml("#EB6C0D"),
-            ColorTranslator.FromHtml("#AC6600"),
-            ColorTranslator.FromHtml("#FB9C0E"),
-            ColorTranslator.FromHtml("#006400"),
-            ColorTranslator.FromHtml("#009900")
-        };
         public static readonly HashSet<string> BEType = new HashSet<string> { "Round", "Slug", "Buckshot", "Grenade launcher cartridge" };
+
         public static readonly string SettingsPath = @"settings.json";
-        public static readonly string AppName = "EscapeFromTarkov";
-        public static readonly string Loading = "Loading...";
-        public static readonly string NotFound = "Item Name Not Found.";
-        public static readonly string NoFlea = "Item not Found on Flea.";
-        public static readonly string NotFinishLoading = "Wait for Loading Data. Please Check Your Internet, and Check Tarkov Wiki Site.";
-        public static readonly string PressCompareKey = "Please Press Compare Key.";
-        public static bool FinishLoadingBallistics = false;
-        public static readonly string WikiLink = "https://escapefromtarkov.fandom.com/wiki/";
-        public static readonly string TarkovMarketLink = "https://tarkov-market.com/item/";
-        public static readonly string OfficialLink = "https://www.escapefromtarkov.com/";
-        public static readonly string GithubLink = "https://github.com/hwangshkr/TarkovPriceViewer";
-        public static readonly string CheckUpdateLink = "https://github.com/hwangshkr/TarkovPriceViewer/raw/main/README.md";
-        public static readonly char RoubleChar = '₽';
-        public static readonly char DolarChar = '$';
-        public static readonly char EuroChar = '€';
-        public static readonly char[] SplitCur = new char[] { RoubleChar, DolarChar, EuroChar };
-        public static readonly Regex InRaidRegex = new Regex(@"in raid");
-        public static readonly Regex MoneyRegex = new Regex(@"([\d,]+[₽\$€]|[₽\$€][\d,]+)");
 
-        private static MainForm? _main = null;
-
-        [STAThread]
-        private static void Main()
+        public static void ConfigureServices(IServiceCollection services)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            services.RegisterLogger();
 
-            foreach (var process in Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName))
+            services.AddScoped<MainForm>();
+            services.AddScoped<InfoOverlay>();
+            services.AddScoped<CompareOverlay>();
+
+            services.AddLocalization(o => o.ResourcesPath = "Properties/Resources");
+            services.Configure<RequestLocalizationOptions>(options =>
             {
-                if (process.Id == Process.GetCurrentProcess().Id)
+                var supportedCultures = new[]
                 {
-                    continue;
-                }
-                try
-                {
-                    process.Kill();
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                }
-            }
-
-            ThreadPool.SetMinThreads(10, 10);
-            ThreadPool.SetMaxThreads(20, 20);
-
-            var task = Task.Factory.StartNew(() => GetBallistics());
-
-            LoadSettings();
-            GetItemList();
-
-            _main = new MainForm();
-
-            if (Convert.ToBoolean(Settings["MinimizetoTrayWhenStartup"]))
-            {
-                Application.Run();
-            }
-            else
-            {
-                Application.Run(_main);
-            }
+                new CultureInfo("en-US"),
+            };
+                options.DefaultRequestCulture = new RequestCulture("en-US", "en-US");
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+            });
         }
 
-        private static void GetItemList()
+        public static void GetItemList()
         {
             string[] textValue = null;
             if (File.Exists(@"Resources\itemlist.txt"))
@@ -130,8 +89,10 @@ namespace TarkovPriceViewer
                     text = "{}";
                     Settings = JsonSerializer.Deserialize<Dictionary<string, string>>(text);
                 }
+
                 Settings.Remove("Version");//force
                 Settings.Add("Version", "v1.16");//force
+
                 if (!Settings.TryGetValue("MinimizetoTrayWhenStartup", out var st))
                 {
                     Settings.Add("MinimizetoTrayWhenStartup", "false");
@@ -212,7 +173,7 @@ namespace TarkovPriceViewer
             }
         }
 
-        private static void GetBallistics()
+        public static void GetBallistics()
         {
             while (!FinishLoadingBallistics)
             {
@@ -221,7 +182,7 @@ namespace TarkovPriceViewer
                     var doc = new HtmlAgilityPack.HtmlDocument();
 
                     using var httpClient = new HttpClient();
-                    using (var response = httpClient.GetAsync($"{WikiLink}Ballistics").ConfigureAwait(false).GetAwaiter().GetResult())
+                    using (var response = httpClient.GetAsync($"{Links.WIKI}Ballistics").ConfigureAwait(false).GetAwaiter().GetResult())
                     {
                         using var content = response.Content;
                         var json = content.ReadAsStringAsync().Result;
@@ -229,7 +190,7 @@ namespace TarkovPriceViewer
                         doc.LoadHtml(json);
                     }
 
-                    Debug.WriteLine(WikiLink + "Ballistics");
+                    Debug.WriteLine(Links.WIKI + "Ballistics");
 
                     var node_tm = doc.DocumentNode.SelectSingleNode("//table[@id='trkballtable']");
                     HtmlAgilityPack.HtmlNodeCollection? nodes = null;

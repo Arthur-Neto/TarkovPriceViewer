@@ -1,13 +1,14 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
+﻿using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using TarkovPriceViewer;
+using TarkovPriceViewer.Properties;
 
 namespace TarkovPriceChecker
 {
-    public partial class Overlay : Form
+    public partial class InfoOverlay : Form
     {
         [DllImport("user32.dll", SetLastError = true)]
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
@@ -19,32 +20,49 @@ namespace TarkovPriceChecker
         private const int WS_EX_TOOLWINDOW = 0x00000080;
         private const int WS_EX_LAYERED = 0x80000;
         private const int WS_EX_TRANSPARENT = 0x20;
+
         private static int _compareSize = 0;
-        private static bool _isInfoForm = true;
         private static bool _isMoving = false;
         private static int _x, _y;
 
+        private static readonly Regex _inRaidRegex = new Regex(@"in raid");
+        private static readonly Regex _moneyRegex = new Regex(@"([\d,]+[₽\$€]|[₽\$€][\d,]+)");
+
+        private static readonly Color[] _beColor = new Color[]
+        {
+            ColorTranslator.FromHtml("#B32425"),
+            ColorTranslator.FromHtml("#DD3333"),
+            ColorTranslator.FromHtml("#EB6C0D"),
+            ColorTranslator.FromHtml("#AC6600"),
+            ColorTranslator.FromHtml("#FB9C0E"),
+            ColorTranslator.FromHtml("#006400"),
+            ColorTranslator.FromHtml("#009900")
+        };
+
+        private readonly IStringLocalizer<Resources> _resources;
+        private readonly ILogger<InfoOverlay> _logger;
+
         private readonly object _lock = new object();
 
-        public Overlay(bool _isinfoform)
+        public InfoOverlay(
+            IStringLocalizer<Resources> resources,
+            ILogger<InfoOverlay> logger
+        )
         {
             InitializeComponent();
 
-            _isInfoForm = _isinfoform;
+            _resources = resources;
+            _logger = logger;
+
             TopMost = true;
+
             var style = GetWindowLong(Handle, GWL_EXSTYLE);
-            if (_isInfoForm)
-            {
-                Opacity = int.Parse(Program.Settings["Overlay_Transparent"]) * 0.01;
-                SetWindowLong(Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT);
-            }
-            else
-            {
-                SetWindowLong(Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TOOLWINDOW);
-            }
+            Opacity = int.Parse(Program.Settings["Overlay_Transparent"]) * 0.01;
+            SetWindowLong(Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT);
+
             SettingFormPos();
-            InitializeCompareData();
             InitializeBallistics();
+
             iteminfo_panel.Visible = false;
             itemcompare_panel.Visible = false;
         }
@@ -53,22 +71,6 @@ namespace TarkovPriceChecker
         {
             Location = new Point(0, 0);
             Size = new Size(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
-        }
-
-        public void InitializeCompareData()
-        {
-            ItemCompareGrid.ColumnCount = 7;
-            ItemCompareGrid.Columns[0].Name = "Name";
-            ItemCompareGrid.Columns[1].Name = "Recoil";
-            ItemCompareGrid.Columns[2].Name = "Accuracy";
-            ItemCompareGrid.Columns[3].Name = "Ergo";
-            ItemCompareGrid.Columns[4].Name = "Flea";
-            ItemCompareGrid.Columns[5].Name = "NPC";
-            ItemCompareGrid.Columns[6].Name = "LL";
-            ItemCompareGrid.Visible = false;
-            ItemCompareGrid.ClearSelection();
-            ItemCompareGrid.SortCompare += new DataGridViewSortCompareEventHandler(ItemCompareGridSortCompare);
-            ResizeGrid(ItemCompareGrid);
         }
 
         public void InitializeBallistics()
@@ -86,19 +88,6 @@ namespace TarkovPriceChecker
             iteminfo_ball.Visible = false;
             iteminfo_ball.ClearSelection();
             ResizeGrid(iteminfo_ball);
-        }
-
-        private void ItemCompareGridSortCompare(object sender, DataGridViewSortCompareEventArgs e)
-        {
-            if (e.Column.Index is 0 or 5 or 6)
-            {
-                return;
-            }
-
-            int.TryParse(string.Join("", e.CellValue1.ToString().Replace(",", "").Split(Program.SplitCur)), out var s1);
-            int.TryParse(string.Join("", e.CellValue2.ToString().Replace(",", "").Split(Program.SplitCur)), out var s2);
-            e.SortResult = s1.CompareTo(s2);
-            e.Handled = true;
         }
 
         public void ResizeGrid(DataGridView view)
@@ -126,11 +115,11 @@ namespace TarkovPriceChecker
                         try
                         {
                             int.TryParse((string)iteminfo_ball.Rows[b].Cells[i].Value, out var level);
-                            iteminfo_ball.Rows[b].Cells[i].Style.BackColor = Program.BEColor[level];
+                            iteminfo_ball.Rows[b].Cells[i].Style.BackColor = _beColor[level];
                         }
-                        catch (Exception e)
+                        catch (Exception ex)
                         {
-                            Debug.WriteLine(e.Message);
+                            _logger.LogError(ex, "Exception on SetBallisticsColor");
                         }
                     }
                 }
@@ -148,11 +137,11 @@ namespace TarkovPriceChecker
                     {
                         if (item == null || item.MarketAddress == null)
                         {
-                            iteminfo_text.Text = Program.NotFound;
+                            iteminfo_text.Text = _resources["NotFound"];
                         }
                         else if (item.PriceLast == null)
                         {
-                            iteminfo_text.Text = Program.NoFlea;
+                            iteminfo_text.Text = _resources["NoFlea"];
                         }
                         else
                         {
@@ -207,47 +196,6 @@ namespace TarkovPriceChecker
             Invoke(show);
         }
 
-        public void ShowCompare(Item item, CancellationToken cts_one)
-        {
-            Action show = delegate ()
-            {
-                if (!cts_one.IsCancellationRequested)
-                {
-                    lock (_lock)
-                    {
-                        var temp = CheckItemExist(item);
-                        if (item != null && item.MarketAddress != null)
-                        {
-                            if (temp != null)
-                            {
-                                ItemCompareGrid.Rows.Remove(temp);
-                            }
-                            ItemCompareGrid.Rows.Add(item.Data());
-                            if (ItemCompareGrid.SortedColumn != null)
-                            {
-                                ItemCompareGrid.Sort(ItemCompareGrid.SortedColumn,
-                                    ItemCompareGrid.SortOrder.Equals(SortOrder.Ascending) ? ListSortDirection.Ascending : ListSortDirection.Descending);
-                            }
-                            ItemCompareGrid.Visible = true;
-                            ResizeGrid(ItemCompareGrid);
-                        }
-                        if (temp == null)
-                        {
-                            if (--_compareSize > 0)
-                            {
-                                itemcompare_text.Text = string.Format("{0} Left : {1}", Program.Loading, _compareSize);
-                            }
-                            else
-                            {
-                                itemcompare_text.Text = string.Format("{0}", Program.PressCompareKey);
-                            }
-                        }
-                    }
-                }
-            };
-            Invoke(show);
-        }
-
         public DataGridViewRow CheckItemExist(Item item)
         {
             DataGridViewRow? value = null;
@@ -271,7 +219,7 @@ namespace TarkovPriceChecker
 
         public void SetPriceColor()
         {
-            var mc = Program.MoneyRegex.Matches(iteminfo_text.Text);
+            var mc = _moneyRegex.Matches(iteminfo_text.Text);
             foreach (Match m in mc)
             {
                 iteminfo_text.Select(m.Index, m.Length);
@@ -281,7 +229,7 @@ namespace TarkovPriceChecker
 
         public void SetInraidColor()
         {
-            var mc = Program.InRaidRegex.Matches(iteminfo_text.Text);
+            var mc = _inRaidRegex.Matches(iteminfo_text.Text);
             foreach (Match m in mc)
             {
                 iteminfo_text.Select(m.Index, m.Length);
@@ -307,7 +255,7 @@ namespace TarkovPriceChecker
                 {
                     iteminfo_ball.Rows.Clear();
                     iteminfo_ball.Visible = false;
-                    iteminfo_text.Text = Program.Loading;
+                    iteminfo_text.Text = _resources["Loading"];
                     iteminfo_panel.Location = point;
                     iteminfo_panel.Visible = true;
                 }
@@ -323,33 +271,9 @@ namespace TarkovPriceChecker
                 {
                     iteminfo_ball.Rows.Clear();
                     iteminfo_ball.Visible = false;
-                    iteminfo_text.Text = Program.NotFinishLoading;
+                    iteminfo_text.Text = _resources["NotFinishLoading"];
                     iteminfo_panel.Location = point;
                     iteminfo_panel.Visible = true;
-                }
-            };
-            Invoke(show);
-        }
-
-        public void ShowLoadingCompare(Point point, CancellationToken cts_one)
-        {
-            Action show = delegate ()
-            {
-                if (!cts_one.IsCancellationRequested)
-                {
-                    lock (_lock)
-                    {
-                        if (!itemcompare_panel.Visible)
-                        {
-                            _compareSize = 0;
-                            ItemCompareGrid.Rows.Clear();
-                            ResizeGrid(ItemCompareGrid);
-                            itemcompare_panel.Location = point;
-                            itemcompare_panel.Visible = true;
-                            itemcompare_text.Text = string.Format("{0}", Program.PressCompareKey);
-                        }
-                        itemcompare_text.Text = string.Format("{0} Left : {1}", Program.Loading, ++_compareSize);
-                    }
                 }
             };
             Invoke(show);
@@ -361,16 +285,6 @@ namespace TarkovPriceChecker
             {
                 iteminfo_ball.Visible = false;
                 iteminfo_panel.Visible = false;
-            };
-            Invoke(show);
-        }
-
-        public void HideCompare()
-        {
-            Action show = delegate ()
-            {
-                ItemCompareGrid.Visible = false;
-                itemcompare_panel.Visible = false;
             };
             Invoke(show);
         }

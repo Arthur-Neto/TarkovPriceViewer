@@ -1,7 +1,7 @@
 ﻿
 namespace TarkovPriceChecker
 {
-    partial class Overlay
+    partial class CompareOverlay
     {
         /// <summary>
         /// Required designer variable.

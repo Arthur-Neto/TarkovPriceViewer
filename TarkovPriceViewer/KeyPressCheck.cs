@@ -13,7 +13,7 @@ namespace TarkovPriceChecker
             InitializeComponent();
         }
 
-        private void KeyPressCheck_FormClosed(object sender, FormClosedEventArgs e)
+        private void KeyPressCheckFormClosed(object sender, FormClosedEventArgs e)
         {
             if (Owner != null)
             {

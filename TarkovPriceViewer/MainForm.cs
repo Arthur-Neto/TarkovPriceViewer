@@ -1,17 +1,19 @@
-﻿using OpenCvSharp;
+﻿using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
+using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System.Diagnostics;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using TarkovPriceViewer;
+using TarkovPriceViewer.Infrastructure.Constants;
+using TarkovPriceViewer.Properties;
 using Tesseract;
 
 namespace TarkovPriceChecker
 {
     public partial class MainForm : Form
     {
-
         [DllImport("user32.dll")]
         private static extern bool PrintWindow(IntPtr hWnd, IntPtr hdcBlt, int nFlags);
 
@@ -47,8 +49,7 @@ namespace TarkovPriceChecker
         [DllImport("User32.dll")]
         private static extern bool GetLastInputInfo(ref LASTINPUTINFO Dummy);
 
-        private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_LAYERED = 0x80000;
+        private static readonly IntPtr _hInstance = LoadLibrary("User32");
 
         private struct WINDOWPLACEMENT
         {
@@ -74,30 +75,44 @@ namespace TarkovPriceChecker
             public uint DwTime;
         }
 
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_LAYERED = 0x80000;
         private const int WH_KEYBOARD_LL = 13;
         private const int WM_KEYUP = 0x101;
         private const int WH_MOUSE_LL = 14;
         private const int WM_MOUSEMOVE = 0x200;
 
+        private static int _nFlags = 0x0;
+        private static long _pressTime = 0;
+
         private static bool _isInfoClosed = true;
         private static bool _isCompareClosed = true;
+
+        private static InfoOverlay? _overlayInfo = null;
+        private static CompareOverlay? _overlayCompare = null;
         private static LowLevelProc? _procKeyboard = null;
         private static LowLevelProc? _procMouse = null;
+        private static Control? _pressKeyControl = null;
+
         private static IntPtr _hhookKeyboard = IntPtr.Zero;
         private static IntPtr _hhookMouse = IntPtr.Zero;
-        private static readonly IntPtr _hInstance = LoadLibrary("User32");
+
         private static System.Drawing.Point _point = new System.Drawing.Point(0, 0);
-        private static int _nFlags = 0x0;
-        private static readonly Overlay _overlayInfo = new Overlay(true);
-        private static readonly Overlay _overlayCompare = new Overlay(false);
-        private static long _pressTime = 0;
+
         private static CancellationTokenSource _cancellationTokenInfo = new CancellationTokenSource();
         private static CancellationTokenSource _cancellationTokenCompare = new CancellationTokenSource();
-        private static Control? _pressKeyControl = null;
         private static Scalar _lineColor = new Scalar(90, 89, 82);
         private static long _idleTime = 3600000;
 
-        public MainForm()
+        private readonly IStringLocalizer<Resources> _resources;
+        private readonly ILogger<MainForm> _logger;
+
+        public MainForm(
+            InfoOverlay infoOverlay,
+            CompareOverlay compareOverlay,
+            IStringLocalizer<Resources> resources,
+            ILogger<MainForm> logger
+        )
         {
             var style = GetWindowLong(Handle, GWL_EXSTYLE);
 
@@ -112,11 +127,16 @@ namespace TarkovPriceChecker
             SettingUI();
             SetHook();
 
+            _overlayInfo = infoOverlay;
             _overlayInfo.Owner = this;
             _overlayInfo.Show();
 
+            _overlayCompare = compareOverlay;
             _overlayCompare.Owner = this;
             _overlayCompare.Show();
+
+            _resources = resources;
+            _logger = logger;
         }
 
         private void SettingUI()
@@ -155,7 +175,7 @@ namespace TarkovPriceChecker
             {
                 if (force)
                 {
-                    Debug.WriteLine("force unhook.");
+                    _logger.LogDebug("Force Unhook");
                     UnHook();
                 }
                 if (_hhookKeyboard == IntPtr.Zero)
@@ -168,9 +188,9 @@ namespace TarkovPriceChecker
                     SetMouseHook();
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Debug.WriteLine(e.Message);
+                _logger.LogError(ex, "Exception on Unhook");
             }
         }
 
@@ -205,9 +225,9 @@ namespace TarkovPriceChecker
                 }
                 UnsetMouseHook();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Debug.WriteLine(e.Message);
+                _logger.LogError(ex, "Exception on Unhook");
             }
         }
 
@@ -253,15 +273,16 @@ namespace TarkovPriceChecker
                         else
                         {
                             _point = MousePosition;
-                            _overlayInfo.ShowWaitBallistics(_point);
+                            _overlayInfo?.ShowWaitBallistics(_point);
                         }
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Debug.WriteLine(e.Message);
+                _logger.LogError(ex, "Exception on hook keyboard");
             }
+
             return CallNextHookEx(_hhookKeyboard, code, (int)wParam, lParam);
         }
 
@@ -276,9 +297,9 @@ namespace TarkovPriceChecker
                     CloseItemInfo();
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Debug.WriteLine(e.Message);
+                _logger.LogError(ex, "Exception on hook mouse");
             }
 
             return CallNextHookEx(_hhookMouse, code, (int)wParam, lParam);
@@ -302,9 +323,12 @@ namespace TarkovPriceChecker
         private void CloseApp()
         {
             UnHook();
+
             TrayIcon.Dispose();
+
             CloseItemInfo();
             CloseItemCompare();
+
             Program.SaveSettings();
             Application.Exit();
         }
@@ -314,8 +338,8 @@ namespace TarkovPriceChecker
             _isInfoClosed = false;
             _cancellationTokenInfo.Cancel();
             _cancellationTokenInfo = new CancellationTokenSource();
-            _overlayInfo.ShowLoadingInfo(_point, _cancellationTokenInfo.Token);
-            Task task = Task.Factory.StartNew(() => FindItemTask(true, _cancellationTokenInfo.Token));
+            _overlayInfo?.ShowLoadingInfo(_point, _cancellationTokenInfo.Token);
+            var task = Task.Factory.StartNew(() => FindItemTask(true, _cancellationTokenInfo.Token));
         }
 
         public void LoadingItemCompare()
@@ -326,23 +350,23 @@ namespace TarkovPriceChecker
                 _cancellationTokenCompare.Cancel();
                 _cancellationTokenCompare = new CancellationTokenSource();
             }
-            _overlayCompare.ShowLoadingCompare(_point, _cancellationTokenCompare.Token);
+            _overlayCompare?.ShowLoadingCompare(_point, _cancellationTokenCompare.Token);
 
-            Task task = Task.Factory.StartNew(() => FindItemTask(false, _cancellationTokenCompare.Token));
+            var task = Task.Factory.StartNew(() => FindItemTask(false, _cancellationTokenCompare.Token));
         }
 
         public void CloseItemInfo()
         {
             _isInfoClosed = true;
             _cancellationTokenInfo.Cancel();
-            _overlayInfo.HideInfo();
+            _overlayInfo?.HideInfo();
         }
 
         public void CloseItemCompare()
         {
             _isCompareClosed = true;
             _cancellationTokenCompare.Cancel();
-            _overlayCompare.HideCompare();
+            _overlayCompare?.HideCompare();
         }
 
         private int FindItemTask(bool isiteminfo, CancellationToken cts_one)
@@ -358,7 +382,7 @@ namespace TarkovPriceChecker
             }
             else
             {
-                var fullimage = CaptureScreen(CheckisTarkov());
+                var fullimage = CaptureScreen(CheckIsTarkov());
                 if (fullimage != null)
                 {
                     if (!cts_one.IsCancellationRequested)
@@ -372,20 +396,21 @@ namespace TarkovPriceChecker
                     {
                         if (isiteminfo)
                         {
-                            _overlayInfo.ShowInfo(null, cts_one);
+                            _overlayInfo?.ShowInfo(null, cts_one);
                         }
                         else
                         {
-                            _overlayCompare.ShowCompare(null, cts_one);
+                            _overlayCompare?.ShowCompare(null, cts_one);
                         }
                     }
                     Debug.WriteLine("image null");
                 }
             }
+
             return 0;
         }
 
-        private IntPtr CheckisTarkov()
+        private IntPtr CheckIsTarkov()
         {
             var hWnd = GetForegroundWindow();
             if (hWnd != IntPtr.Zero)
@@ -394,17 +419,18 @@ namespace TarkovPriceChecker
 
                 GetWindowText(hWnd, sbWinText, 260);
 
-                if (sbWinText.ToString() == Program.AppName)
+                if (sbWinText.ToString().Equals(_resources["AppName"]))
                 {
                     return hWnd;
                 }
             }
-            Debug.WriteLine("error - no app");
+
+            _logger.LogWarning("Tarkov Not Found");
 
             return IntPtr.Zero;
         }
 
-        private Bitmap CaptureScreen(IntPtr hWnd)
+        private Bitmap? CaptureScreen(IntPtr hWnd)
         {
             if (hWnd != IntPtr.Zero)
             {
@@ -421,18 +447,10 @@ namespace TarkovPriceChecker
             }
             else
             {
-                Debug.WriteLine("error - no window");
+                _logger.LogWarning("Tarkov Window Not Found");
+
                 return null;
             }
-        }
-
-        private void ShowtestImage(string name, Mat mat)
-        {
-            Action show = delegate ()
-            {
-                Cv2.ImShow(name, mat);
-            };
-            Invoke(show);
         }
 
         private string GetTesseract(Mat textmat)
@@ -443,21 +461,22 @@ namespace TarkovPriceChecker
                 using var ocr = new TesseractEngine(@"./Resources/tessdata", "eng", EngineMode.Default); //should use once
                 using var temp = BitmapConverter.ToBitmap(textmat);
                 using var texts = ocr.Process(Pix.LoadFromMemory(ImageToByte(temp)));
-                text = texts.GetText().Replace("\n", " ").Split(Program.SplitCur)[0].Trim();
-                Debug.WriteLine("text : " + text);
+                text = texts.GetText().Replace("\n", " ").Split(Currencies.AllCurrencies)[0].Trim();
+
+                _logger.LogDebug("GetTesseract Text: {TesseractText}", text);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Debug.WriteLine("tesseract error " + e.Message);
+                _logger.LogError(ex, "Exception on GetTesseract");
             }
 
             return text;
         }
 
-        private static byte[] ImageToByte(Image img)
+        private static byte[]? ImageToByte(Image img)
         {
             var converter = new ImageConverter();
-            return (byte[])converter.ConvertTo(img, typeof(byte[]));
+            return (byte[]?)converter.ConvertTo(img, typeof(byte[]));
         }
 
         private void FindItem(Bitmap fullimage, bool isiteminfo, CancellationToken cts_one)
@@ -495,39 +514,43 @@ namespace TarkovPriceChecker
             fullimage.Dispose();
         }
 
-        private Item MatchItemName(char[] itemname)
+        private Item MatchItemName(char[] itemName)
         {
             var result = new Item();
-            var d = 999;
+            var distance = 999;
             foreach (var item in Program.ItemList)
             {
-                var d2 = LevenshteinDistance(itemname, item.NameCompare);
-                if (d2 < d)
+                var levenshteinDistance = LevenshteinDistance(itemName, item.NameCompare);
+                if (levenshteinDistance < distance)
                 {
                     result = item;
-                    d = d2;
+                    distance = levenshteinDistance;
+
                     if (item.IsName2)
                     {
                         item.IsName2 = false;
                     }
-                    if (d == 0)
+                    if (distance == 0)
                     {
                         break;
                     }
                 }
-                d2 = LevenshteinDistance(itemname, item.NameCompare2);
-                if (d2 < d)
+
+                levenshteinDistance = LevenshteinDistance(itemName, item.NameCompare2);
+                if (levenshteinDistance < distance)
                 {
                     result = item;
-                    d = d2;
+                    distance = levenshteinDistance;
                     item.IsName2 = true;
-                    if (d == 0)
+                    if (distance == 0)
                     {
                         break;
                     }
                 }
             }
-            Debug.WriteLine(d + " text match : " + result.NameDisplay + " & " + result.NameDisplay2);
+
+            _logger.LogDebug("Distance {Distance}, TextMatch: {NameDisplay} & {NameDisplay2}", distance, result.NameDisplay, result.NameDisplay2);
+
             return result;
         }
 
@@ -592,7 +615,7 @@ namespace TarkovPriceChecker
                         var doc = new HtmlAgilityPack.HtmlDocument();
 
                         using var httpClient = new HttpClient();
-                        using (var response = httpClient.GetAsync($"{Program.TarkovMarketLink}{item.MarketAddress}").ConfigureAwait(false).GetAwaiter().GetResult())
+                        using (var response = httpClient.GetAsync($"{Links.TARKOV_MARKET}{item.MarketAddress}").ConfigureAwait(false).GetAwaiter().GetResult())
                         {
                             using var content = response.Content;
                             var json = content.ReadAsStringAsync().Result;
@@ -674,11 +697,11 @@ namespace TarkovPriceChecker
 
                         if (isiteminfo)
                         {
-                            _overlayInfo.ShowInfo(item, cts_one);
+                            _overlayInfo?.ShowInfo(item, cts_one);
                         }
                         else
                         {
-                            _overlayCompare.ShowCompare(item, cts_one);
+                            _overlayCompare?.ShowCompare(item, cts_one);
                         }
 
                         var isdisconnected = false;
@@ -687,10 +710,10 @@ namespace TarkovPriceChecker
                             isdisconnected = false;
                             try
                             {
-                                Debug.WriteLine(Program.WikiLink + item.WikiAddress);
+                                _logger.LogDebug("Search for item info on Wiki {WikiAddress}", $"{Links.WIKI}{item.WikiAddress}");
                                 try
                                 {
-                                    using var response = httpClient.GetAsync($"{Program.WikiLink}{item.WikiAddress}").ConfigureAwait(false).GetAwaiter().GetResult();
+                                    using var response = httpClient.GetAsync($"{Links.WIKI}{item.WikiAddress}").ConfigureAwait(false).GetAwaiter().GetResult();
                                     using var content = response.Content;
                                     var json = content.ReadAsStringAsync().Result;
 
@@ -698,15 +721,17 @@ namespace TarkovPriceChecker
                                 }
                                 catch (Exception ex)
                                 {
-                                    Debug.WriteLine(ex.Message);
-                                    Debug.WriteLine(Program.WikiLink + item.NameDisplay2.Replace(" ", "_"));
+                                    _logger.LogError(ex, "Not found, searching in new link {WikiAddressNameDisplay2}", $"{Links.WIKI}{item.NameDisplay2.Replace(" ", "_")}");
 
-                                    using var response = httpClient.GetAsync($"{Program.WikiLink}{ item.NameDisplay2.Replace(" ", "_")}").ConfigureAwait(false).GetAwaiter().GetResult();
+                                    Debug.WriteLine(ex.Message);
+
+                                    using var response = httpClient.GetAsync($"{Links.WIKI}{ item.NameDisplay2.Replace(" ", "_")}").ConfigureAwait(false).GetAwaiter().GetResult();
                                     using var content = response.Content;
                                     var json = content.ReadAsStringAsync().Result;
 
                                     doc.LoadHtml(json);
                                 }
+
                                 node_tm = doc.DocumentNode.SelectSingleNode("//div[@class='mw-parser-output']");
                                 if (node_tm != null)
                                 {
@@ -825,6 +850,7 @@ namespace TarkovPriceChecker
                                                                 }
                                                             }
                                                         }
+
                                                         var firstarrow = craftlist.IndexOf("→");
                                                         var secondarrow = craftlist.LastIndexOf("→");
                                                         var firstlist = craftlist.GetRange(0, firstarrow);
@@ -853,28 +879,28 @@ namespace TarkovPriceChecker
                                     }
                                 }
                             }
-                            catch (WebException ex) when (ex.Status == WebExceptionStatus.Timeout)
+                            catch (Exception ex)
                             {
                                 isdisconnected = true;
-                                Debug.WriteLine("wiki reconnected...");
+                                _logger.LogError(ex, "Exception on searching, wiki reconnected...");
                             }
                         } while (!cts_one.IsCancellationRequested && isdisconnected);
                     }
                     item.LastFetch = DateTime.Now;
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    Debug.WriteLine(e.Message);
+                    _logger.LogError(ex, "Exception on searching...");
                 }
             }
 
             if (isiteminfo)
             {
-                _overlayInfo.ShowInfo(item, cts_one);
+                _overlayInfo?.ShowInfo(item, cts_one);
             }
             else
             {
-                _overlayCompare.ShowCompare(item, cts_one);
+                _overlayCompare?.ShowCompare(item, cts_one);
             }
         }
 
@@ -917,7 +943,7 @@ namespace TarkovPriceChecker
         {
             var psi = new ProcessStartInfo
             {
-                FileName = Program.OfficialLink,
+                FileName = Links.OFFICIAL_SITE,
                 UseShellExecute = true
             };
             Process.Start(psi);
@@ -927,7 +953,7 @@ namespace TarkovPriceChecker
         {
             var psi = new ProcessStartInfo
             {
-                FileName = Program.WikiLink,
+                FileName = Links.WIKI,
                 UseShellExecute = true
             };
             Process.Start(psi);
@@ -937,7 +963,7 @@ namespace TarkovPriceChecker
         {
             var psi = new ProcessStartInfo
             {
-                FileName = Program.TarkovMarketLink,
+                FileName = Links.TARKOV_MARKET,
                 UseShellExecute = true
             };
             Process.Start(psi);
@@ -996,14 +1022,14 @@ namespace TarkovPriceChecker
             var tb = (sender as TrackBar);
             Program.Settings["Overlay_Transparent"] = tb.Value.ToString();
             TransParent_Text.Text = Program.Settings["Overlay_Transparent"] + "%";
-            _overlayInfo.ChangeTransparent(tb.Value);
+            _overlayInfo?.ChangeTransparent(tb.Value);
         }
 
         private void GithubClick(object sender, EventArgs e)
         {
             var psi = new ProcessStartInfo
             {
-                FileName = Program.GithubLink,
+                FileName = Links.GITHUB_REPO,
                 UseShellExecute = true
             };
             Process.Start(psi);
@@ -1021,7 +1047,7 @@ namespace TarkovPriceChecker
             {
                 var check = string.Empty;
                 using var httpClient = new HttpClient();
-                using (var response = httpClient.GetAsync($"{Program.CheckUpdateLink}").ConfigureAwait(false).GetAwaiter().GetResult())
+                using (var response = httpClient.GetAsync($"{Links.GITHUB_REPO}").ConfigureAwait(false).GetAwaiter().GetResult())
                 {
                     using var content = response.Content;
                     check = content.ReadAsStringAsync().Result;
@@ -1035,8 +1061,8 @@ namespace TarkovPriceChecker
                         sp = sp2[sp2.Length - 1].Trim();
                         if (!Program.Settings["Version"].Equals(sp))
                         {
-                            MessageBox.Show("New version (" + sp + ") found. Please download new version. Current Version is " + Program.Settings["Version"]);
-                            Process.Start(Program.GithubLink);
+                            MessageBox.Show($"New version ({sp}) found. Please download new version. Current Version is {Program.Settings["Version"]}");
+                            Process.Start(Links.GITHUB_REPO);
                         }
                         else
                         {
@@ -1047,8 +1073,8 @@ namespace TarkovPriceChecker
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Exception on checking for updates...");
                 Debug.WriteLine(ex.Message);
-                MessageBox.Show("Can not check update. Please check your network.");
             }
 
             Action show = delegate ()

@@ -1,0 +1,24 @@
+﻿{
+  "Serilog": {
+    "Using": [ "Serilog.Sinks.File", "Serilog.Sinks.Async" ],
+    "MinimumLevel": "Debug",
+    "WriteTo": [
+      {
+        "Name": "Async",
+        "Args": {
+          "configure": [
+            {
+              "Name": "File",
+              "Args": {
+                "path": "%BASEDIR%/Logs/log.txt",
+                "rollingInterval": "Day",
+                "retainedFileCountLimit": "1000"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId" ]
+  }
+}
