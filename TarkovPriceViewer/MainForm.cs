@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System.Diagnostics;
@@ -7,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using TarkovPriceViewer;
 using TarkovPriceViewer.Infrastructure.Constants;
+using TarkovPriceViewer.Infrastructure.Settings;
 using TarkovPriceViewer.Properties;
 using Tesseract;
 
@@ -90,6 +92,7 @@ namespace TarkovPriceChecker
 
         private static InfoOverlay? _overlayInfo = null;
         private static CompareOverlay? _overlayCompare = null;
+        private static KeyPressCheck? _keyPressCheck = null;
         private static LowLevelProc? _procKeyboard = null;
         private static LowLevelProc? _procMouse = null;
         private static Control? _pressKeyControl = null;
@@ -106,12 +109,15 @@ namespace TarkovPriceChecker
 
         private readonly IStringLocalizer<Resources> _resources;
         private readonly ILogger<MainForm> _logger;
+        private readonly AppSettings _appSettings;
 
         public MainForm(
             InfoOverlay infoOverlay,
             CompareOverlay compareOverlay,
+            KeyPressCheck keyPressCheck,
             IStringLocalizer<Resources> resources,
-            ILogger<MainForm> logger
+            ILogger<MainForm> logger,
+            IOptions<AppSettings> options
         )
         {
             var style = GetWindowLong(Handle, GWL_EXSTYLE);
@@ -124,8 +130,8 @@ namespace TarkovPriceChecker
             }
 
             InitializeComponent();
-            SettingUI();
-            SetHook();
+
+            _keyPressCheck = keyPressCheck;
 
             _overlayInfo = infoOverlay;
             _overlayInfo.Owner = this;
@@ -137,28 +143,32 @@ namespace TarkovPriceChecker
 
             _resources = resources;
             _logger = logger;
+            _appSettings = options.Value;
+
+            SettingUI();
+            SetHook();
         }
 
         private void SettingUI()
         {
             MinimizeBox = false;
             MaximizeBox = false;
-            Version.Text = Program.Settings["Version"];
-            MinimizetoTrayWhenStartup.Checked = Convert.ToBoolean(Program.Settings["MinimizetoTrayWhenStartup"]);
-            CloseOverlayWhenMouseMoved.Checked = Convert.ToBoolean(Program.Settings["CloseOverlayWhenMouseMoved"]);
-            RandomItem.Checked = Convert.ToBoolean(Program.Settings["RandomItem"]);
-            last_price_box.Checked = Convert.ToBoolean(Program.Settings["Show_Last_Price"]);
-            day_price_box.Checked = Convert.ToBoolean(Program.Settings["Show_Day_Price"]);
-            week_price_box.Checked = Convert.ToBoolean(Program.Settings["Show_Week_Price"]);
-            sell_to_trader_box.Checked = Convert.ToBoolean(Program.Settings["Sell_to_Trader"]);
-            buy_from_trader_box.Checked = Convert.ToBoolean(Program.Settings["Buy_From_Trader"]);
-            needs_box.Checked = Convert.ToBoolean(Program.Settings["Needs"]);
-            barters_and_crafts_box.Checked = Convert.ToBoolean(Program.Settings["Barters_and_Crafts"]);
-            ShowOverlay_Button.Text = ((Keys)int.Parse(Program.Settings["ShowOverlay_Key"])).ToString();
-            HideOverlay_Button.Text = ((Keys)int.Parse(Program.Settings["HideOverlay_Key"])).ToString();
-            CompareOverlay_Button.Text = ((Keys)int.Parse(Program.Settings["CompareOverlay_Key"])).ToString();
-            TransParent_Bar.Value = int.Parse(Program.Settings["Overlay_Transparent"]);
-            TransParent_Text.Text = Program.Settings["Overlay_Transparent"];
+            Version.Text = Startup.VERSION;
+            MinimizetoTrayWhenStartup.Checked = _appSettings.MinimizetoTrayWhenStartup;
+            CloseOverlayWhenMouseMoved.Checked = _appSettings.CloseOverlayWhenMouseMoved;
+            RandomItem.Checked = _appSettings.RandomItem;
+            last_price_box.Checked = _appSettings.ShowLastPrice;
+            day_price_box.Checked = _appSettings.ShowDayPrice;
+            week_price_box.Checked = _appSettings.ShowWeekPrice;
+            sell_to_trader_box.Checked = _appSettings.SellToTrader;
+            buy_from_trader_box.Checked = _appSettings.BuyFromTrader;
+            needs_box.Checked = _appSettings.Needs;
+            barters_and_crafts_box.Checked = _appSettings.BartersNCrafts;
+            ShowOverlay_Button.Text = ((Keys)int.Parse(_appSettings.ShowOverlayKey)).ToString();
+            HideOverlay_Button.Text = ((Keys)int.Parse(_appSettings.HideOverlayKey)).ToString();
+            CompareOverlay_Button.Text = ((Keys)int.Parse(_appSettings.CompareOverlayKey)).ToString();
+            TransParent_Bar.Value = int.Parse(_appSettings.OverlayTransparency);
+            TransParent_Text.Text = _appSettings.OverlayTransparency;
 
             TrayIcon.Visible = true;
             check_idle_time.Start();
@@ -183,7 +193,7 @@ namespace TarkovPriceChecker
                     _procKeyboard = HookKeyboardProc;
                     _hhookKeyboard = SetWindowsHookEx(WH_KEYBOARD_LL, _procKeyboard, _hInstance, 0);
                 }
-                if (Convert.ToBoolean(Program.Settings["CloseOverlayWhenMouseMoved"]))
+                if (_appSettings.CloseOverlayWhenMouseMoved)
                 {
                     SetMouseHook();
                 }
@@ -242,7 +252,7 @@ namespace TarkovPriceChecker
                         if (Program.FinishLoadingBallistics)
                         {
                             var vkCode = Marshal.ReadInt32(lParam);
-                            if (vkCode == int.Parse(Program.Settings["ShowOverlay_Key"]))
+                            if (vkCode == int.Parse(_appSettings.ShowOverlayKey))
                             {
                                 var CurrentTime = DateTime.Now.Ticks;
                                 if (CurrentTime - _pressTime > 2000000)
@@ -256,15 +266,15 @@ namespace TarkovPriceChecker
                                 }
                                 _pressTime = CurrentTime;
                             }
-                            else if (vkCode == int.Parse(Program.Settings["CompareOverlay_Key"]))
+                            else if (vkCode == int.Parse(_appSettings.CompareOverlayKey))
                             {
                                 _point = MousePosition;
                                 LoadingItemCompare();
                             }
-                            else if (vkCode == int.Parse(Program.Settings["HideOverlay_Key"])
+                            else if (vkCode == int.Parse(_appSettings.HideOverlayKey)
                                 || vkCode == 9 //tab
                                 || vkCode == 27 //esc
-                                )
+                            )
                             {
                                 CloseItemInfo();
                                 CloseItemCompare();
@@ -315,11 +325,6 @@ namespace TarkovPriceChecker
             return (uint)Environment.TickCount - LastUserAction.DwTime;
         }
 
-        public long GetTickCount()
-        {
-            return Environment.TickCount;
-        }
-
         private void CloseApp()
         {
             UnHook();
@@ -329,7 +334,7 @@ namespace TarkovPriceChecker
             CloseItemInfo();
             CloseItemCompare();
 
-            Program.SaveSettings();
+            //Program.SaveSettings();
             Application.Exit();
         }
 
@@ -371,7 +376,7 @@ namespace TarkovPriceChecker
 
         private int FindItemTask(bool isiteminfo, CancellationToken cts_one)
         {
-            if (Convert.ToBoolean(Program.Settings["RandomItem"]))
+            if (_appSettings.RandomItem)
             {
                 if (!cts_one.IsCancellationRequested)
                 {
@@ -403,7 +408,8 @@ namespace TarkovPriceChecker
                             _overlayCompare?.ShowCompare(null, cts_one);
                         }
                     }
-                    Debug.WriteLine("image null");
+
+                    _logger.LogDebug("Finding item, image null");
                 }
             }
 
@@ -936,7 +942,7 @@ namespace TarkovPriceChecker
 
         private void MinimizetoTrayWhenStartupCheckedChanged(object sender, EventArgs e)
         {
-            Program.Settings["MinimizetoTrayWhenStartup"] = (sender as CheckBox).Checked.ToString();
+            //Program.Settings["MinimizetoTrayWhenStartup"] = (sender as CheckBox).Checked.ToString();
         }
 
         private void Tarkov_Official_Click(object sender, EventArgs e)
@@ -971,7 +977,7 @@ namespace TarkovPriceChecker
 
         private void CloseOverlayWhenMouseMovedCheckedChanged(object sender, EventArgs e)
         {
-            Program.Settings["CloseOverlayWhenMouseMoved"] = (sender as CheckBox).Checked.ToString();
+            //Program.Settings["CloseOverlayWhenMouseMoved"] = (sender as CheckBox).Checked.ToString();
             if ((sender as CheckBox).Checked)
             {
                 SetMouseHook();
@@ -997,31 +1003,30 @@ namespace TarkovPriceChecker
         private void OverlayButtonClick(object sender, EventArgs e)
         {
             _pressKeyControl = (sender as Control);
-            var selected = 0;
+            _keyPressCheck.Button = 0;
             if (_pressKeyControl == ShowOverlay_Button)
             {
-                selected = 1;
+                _keyPressCheck.Button = 1;
             }
             else if (_pressKeyControl == HideOverlay_Button)
             {
-                selected = 2;
+                _keyPressCheck.Button = 2;
             }
             else if (_pressKeyControl == CompareOverlay_Button)
             {
-                selected = 3;
+                _keyPressCheck.Button = 3;
             }
-            if (selected != 0)
+            if (_keyPressCheck.Button != 0)
             {
-                var kpc = new KeyPressCheck(selected);
-                kpc.ShowDialog(this);
+                _keyPressCheck.ShowDialog(this);
             }
         }
 
         private void TransParentBarScroll(object sender, EventArgs e)
         {
             var tb = (sender as TrackBar);
-            Program.Settings["Overlay_Transparent"] = tb.Value.ToString();
-            TransParent_Text.Text = Program.Settings["Overlay_Transparent"] + "%";
+            //Program.Settings["Overlay_Transparent"] = tb.Value.ToString();
+            TransParent_Text.Text = $"{_appSettings.OverlayTransparency}%";
             _overlayInfo?.ChangeTransparent(tb.Value);
         }
 
@@ -1059,9 +1064,9 @@ namespace TarkovPriceChecker
                     {
                         var sp2 = sp.Split(' ');
                         sp = sp2[sp2.Length - 1].Trim();
-                        if (!Program.Settings["Version"].Equals(sp))
+                        if (Startup.VERSION.Equals(sp) is false)
                         {
-                            MessageBox.Show($"New version ({sp}) found. Please download new version. Current Version is {Program.Settings["Version"]}");
+                            MessageBox.Show($"New version ({sp}) found. Please download new version. Current Version is {Startup.VERSION}");
                             Process.Start(Links.GITHUB_REPO);
                         }
                         else
@@ -1088,37 +1093,37 @@ namespace TarkovPriceChecker
 
         private void LastPriceBoxCheckedChanged(object sender, EventArgs e)
         {
-            Program.Settings["Show_Last_Price"] = (sender as CheckBox).Checked.ToString();
+            //Program.Settings["Show_Last_Price"] = (sender as CheckBox).Checked.ToString();
         }
 
         private void DayPriceBoxCheckedChanged(object sender, EventArgs e)
         {
-            Program.Settings["Show_Day_Price"] = (sender as CheckBox).Checked.ToString();
+            //Program.Settings["Show_Day_Price"] = (sender as CheckBox).Checked.ToString();
         }
 
         private void WeekPriceBoxCheckedChanged(object sender, EventArgs e)
         {
-            Program.Settings["Show_Week_Price"] = (sender as CheckBox).Checked.ToString();
+            //Program.Settings["Show_Week_Price"] = (sender as CheckBox).Checked.ToString();
         }
 
         private void SellToTraderBoxCheckedChanged(object sender, EventArgs e)
         {
-            Program.Settings["Sell_to_Trader"] = (sender as CheckBox).Checked.ToString();
+            //Program.Settings["Sell_to_Trader"] = (sender as CheckBox).Checked.ToString();
         }
 
         private void BuyFromTraderBoxCheckedChanged(object sender, EventArgs e)
         {
-            Program.Settings["Buy_From_Trader"] = (sender as CheckBox).Checked.ToString();
+            //Program.Settings["Buy_From_Trader"] = (sender as CheckBox).Checked.ToString();
         }
 
         private void NeedsBoxCheckedChanged(object sender, EventArgs e)
         {
-            Program.Settings["Needs"] = (sender as CheckBox).Checked.ToString();
+            //Program.Settings["Needs"] = (sender as CheckBox).Checked.ToString();
         }
 
         private void BartersAndCraftsBoxCheckedChanged(object sender, EventArgs e)
         {
-            Program.Settings["Barters_and_Crafts"] = (sender as CheckBox).Checked.ToString();
+            //Program.Settings["Barters_and_Crafts"] = (sender as CheckBox).Checked.ToString();
         }
 
         private void ExitButtonClick(object sender, EventArgs e)
@@ -1128,7 +1133,7 @@ namespace TarkovPriceChecker
 
         private void RandomItemCheckedChanged(object sender, EventArgs e)
         {
-            Program.Settings["RandomItem"] = (sender as CheckBox).Checked.ToString();
+            //Program.Settings["RandomItem"] = (sender as CheckBox).Checked.ToString();
         }
 
         private void CheckIdleTimeTick(object sender, EventArgs e)

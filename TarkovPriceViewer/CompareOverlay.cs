@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using TarkovPriceViewer;
 using TarkovPriceViewer.Infrastructure.Constants;
 using TarkovPriceViewer.Properties;
@@ -20,25 +19,10 @@ namespace TarkovPriceChecker
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_TOOLWINDOW = 0x00000080;
         private const int WS_EX_LAYERED = 0x80000;
-        private const int WS_EX_TRANSPARENT = 0x20;
 
         private static int _compareSize = 0;
         private static bool _isMoving = false;
         private static int _x, _y;
-
-        private static readonly Regex _inRaidRegex = new Regex(@"in raid");
-        private static readonly Regex _moneyRegex = new Regex(@"([\d,]+[₽\$€]|[₽\$€][\d,]+)");
-
-        private static readonly Color[] _beColor = new Color[]
-        {
-            ColorTranslator.FromHtml("#B32425"),
-            ColorTranslator.FromHtml("#DD3333"),
-            ColorTranslator.FromHtml("#EB6C0D"),
-            ColorTranslator.FromHtml("#AC6600"),
-            ColorTranslator.FromHtml("#FB9C0E"),
-            ColorTranslator.FromHtml("#006400"),
-            ColorTranslator.FromHtml("#009900")
-        };
 
         private readonly IStringLocalizer<Resources> _resources;
         private readonly ILogger<CompareOverlay> _logger;
@@ -127,36 +111,6 @@ namespace TarkovPriceChecker
             view.Refresh();
         }
 
-        public void SetBallisticsColor(Item item)
-        {
-            for (var b = 0; b < iteminfo_ball.Rows.Count; b++)
-            {
-                for (var i = 0; i < iteminfo_ball.Rows[b].Cells.Count; i++)
-                {
-                    if (i == 0)
-                    {
-                        if (iteminfo_ball.Rows[b].Cells[i].Value.Equals(item.NameDisplay) || iteminfo_ball.Rows[b].Cells[i].Value.Equals(item.NameDisplay2))
-                        {
-                            iteminfo_ball.Rows[b].Cells[i].Style.ForeColor = Color.Gold;
-                        }
-                    }
-                    else if (i >= 3)
-                    {
-                        try
-                        {
-                            int.TryParse((string)iteminfo_ball.Rows[b].Cells[i].Value, out var level);
-                            iteminfo_ball.Rows[b].Cells[i].Style.BackColor = _beColor[level];
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Exception on SetBallisticsColor");
-                        }
-                    }
-                }
-            }
-            iteminfo_ball.Refresh();
-        }
-
         public void ShowCompare(Item item, CancellationToken cts_one)
         {
             Action show = delegate ()
@@ -212,59 +166,6 @@ namespace TarkovPriceChecker
             return value;
         }
 
-        public void SetTextColors(Item item)
-        {
-            SetPriceColor();
-            SetInraidColor();
-            SetCraftColor(item);
-        }
-
-        public void SetPriceColor()
-        {
-            var mc = _moneyRegex.Matches(iteminfo_text.Text);
-            foreach (Match m in mc)
-            {
-                iteminfo_text.Select(m.Index, m.Length);
-                iteminfo_text.SelectionColor = Color.Gold;
-            }
-        }
-
-        public void SetInraidColor()
-        {
-            var mc = _inRaidRegex.Matches(iteminfo_text.Text);
-            foreach (Match m in mc)
-            {
-                iteminfo_text.Select(m.Index, m.Length);
-                iteminfo_text.SelectionColor = Color.Red;
-            }
-        }
-
-        public void SetCraftColor(Item item)
-        {
-            var mc = new Regex(item.NameDisplay).Matches(iteminfo_text.Text);
-            foreach (Match m in mc)
-            {
-                iteminfo_text.Select(m.Index, m.Length);
-                iteminfo_text.SelectionColor = Color.Green;
-            }
-        }
-
-        public void ShowWaitBallistics(Point point)
-        {
-            Action show = delegate ()
-            {
-                lock (_lock)
-                {
-                    iteminfo_ball.Rows.Clear();
-                    iteminfo_ball.Visible = false;
-                    iteminfo_text.Text = _resources["NotFinishLoading"];
-                    iteminfo_panel.Location = point;
-                    iteminfo_panel.Visible = true;
-                }
-            };
-            Invoke(show);
-        }
-
         public void ShowLoadingCompare(Point point, CancellationToken cts_one)
         {
             Action show = delegate ()
@@ -296,15 +197,6 @@ namespace TarkovPriceChecker
             {
                 ItemCompareGrid.Visible = false;
                 itemcompare_panel.Visible = false;
-            };
-            Invoke(show);
-        }
-
-        public void ChangeTransparent(int value)
-        {
-            Action show = delegate ()
-            {
-                Opacity = value * 0.01;
             };
             Invoke(show);
         }

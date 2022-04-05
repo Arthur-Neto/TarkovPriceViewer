@@ -1,11 +1,16 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
+using System.Reflection;
 using TarkovPriceChecker;
+using TarkovPriceViewer.Infrastructure.Settings;
 
 namespace TarkovPriceViewer
 {
     public class Startup
     {
+        public static readonly string VERSION = Assembly.GetEntryAssembly().GetName().Version.ToString();
+
         [STAThread]
         private static void Main()
         {
@@ -34,15 +39,21 @@ namespace TarkovPriceViewer
 
             var task = Task.Factory.StartNew(() => Program.GetBallistics());
 
-            Program.LoadSettings();
             Program.GetItemList();
 
             var services = new ServiceCollection();
 
             Program.ConfigureServices(services);
 
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetParent(AppContext.BaseDirectory).FullName)
+                .AddJsonFile("appsettings.json", false)
+                .Build();
+
+            services.Configure<AppSettings>(options => configuration.Bind(options));
+
             using var serviceProvider = services.BuildServiceProvider();
-            if (Convert.ToBoolean(Program.Settings["MinimizetoTrayWhenStartup"]))
+            if (configuration.GetValue<bool>("MinimizetoTrayWhenStartup"))
             {
                 Application.Run();
             }

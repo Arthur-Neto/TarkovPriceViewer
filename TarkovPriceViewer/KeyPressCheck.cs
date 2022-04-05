@@ -1,16 +1,19 @@
-﻿using TarkovPriceViewer;
+﻿using Microsoft.Extensions.Options;
+using TarkovPriceViewer.Infrastructure.Settings;
 
 namespace TarkovPriceChecker
 {
     public partial class KeyPressCheck : Form
     {
-        private readonly int _button;
+        public int Button { get; set; }
 
-        public KeyPressCheck(int button)
+        private readonly AppSettings _appSettings;
+
+        public KeyPressCheck(IOptions<AppSettings> options)
         {
-            _button = button;
-
             InitializeComponent();
+
+            _appSettings = options.Value;
         }
 
         private void KeyPressCheckFormClosed(object sender, FormClosedEventArgs e)
@@ -27,16 +30,16 @@ namespace TarkovPriceChecker
             {
                 if (e.KeyCode != Keys.Escape)
                 {
-                    switch (_button)
+                    switch (Button)
                     {
                         case 1:
-                            Program.Settings["ShowOverlay_Key"] = ((int)e.KeyCode).ToString();
+                            //Program.Settings["ShowOverlay_Key"] = ((int)e.KeyCode).ToString();
                             break;
                         case 2:
-                            Program.Settings["HideOverlay_Key"] = ((int)e.KeyCode).ToString();
+                            //Program.Settings["HideOverlay_Key"] = ((int)e.KeyCode).ToString();
                             break;
                         case 3:
-                            Program.Settings["CompareOverlay_Key"] = ((int)e.KeyCode).ToString();
+                            //Program.Settings["CompareOverlay_Key"] = ((int)e.KeyCode).ToString();
                             break;
                     }
 

@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using TarkovPriceViewer;
+using TarkovPriceViewer.Infrastructure.Settings;
 using TarkovPriceViewer.Properties;
 
 namespace TarkovPriceChecker
@@ -21,7 +23,6 @@ namespace TarkovPriceChecker
         private const int WS_EX_LAYERED = 0x80000;
         private const int WS_EX_TRANSPARENT = 0x20;
 
-        private static int _compareSize = 0;
         private static bool _isMoving = false;
         private static int _x, _y;
 
@@ -41,23 +42,25 @@ namespace TarkovPriceChecker
 
         private readonly IStringLocalizer<Resources> _resources;
         private readonly ILogger<InfoOverlay> _logger;
+        private readonly AppSettings _appSettings;
 
         private readonly object _lock = new object();
 
         public InfoOverlay(
             IStringLocalizer<Resources> resources,
-            ILogger<InfoOverlay> logger
+            ILogger<InfoOverlay> logger,
+            IOptions<AppSettings> options
         )
         {
             InitializeComponent();
 
             _resources = resources;
             _logger = logger;
-
+            _appSettings = options.Value;
             TopMost = true;
 
             var style = GetWindowLong(Handle, GWL_EXSTYLE);
-            Opacity = int.Parse(Program.Settings["Overlay_Transparent"]) * 0.01;
+            Opacity = int.Parse(_appSettings.OverlayTransparency) * 0.01;
             SetWindowLong(Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT);
 
             SettingFormPos();
@@ -147,33 +150,33 @@ namespace TarkovPriceChecker
                         {
                             var sb = new StringBuilder();
                             sb.Append(string.Format("Name : {0}\n\n", item.IsName2 ? item.NameDisplay2 : item.NameDisplay));
-                            if (Convert.ToBoolean(Program.Settings["Show_Last_Price"]))
+                            if (_appSettings.ShowLastPrice)
                             {
                                 sb.Append(string.Format("Last Price : {0} ({1})\n", item.PriceLast, item.LastUpdate));
                             }
-                            if (Convert.ToBoolean(Program.Settings["Show_Day_Price"]) && item.PriceDay != null)
+                            if (_appSettings.ShowDayPrice && item.PriceDay != null)
                             {
                                 sb.Append(string.Format("Day Price : {0}\n", item.PriceDay));
                             }
-                            if (Convert.ToBoolean(Program.Settings["Show_Week_Price"]) && item.PriceWeek != null)
+                            if (_appSettings.ShowWeekPrice && item.PriceWeek != null)
                             {
                                 sb.Append(string.Format("Week Price : {0}\n", item.PriceWeek));
                             }
-                            if (Convert.ToBoolean(Program.Settings["Sell_to_Trader"]) && item.SellToTrader != null)
+                            if (_appSettings.SellToTrader && item.SellToTrader != null)
                             {
                                 sb.Append(string.Format("\nSell to Trader : {0}", item.SellToTrader));
                                 sb.Append(string.Format("\nSell to Trader Price : {0}\n", item.SellToTraderPrice));
                             }
-                            if (Convert.ToBoolean(Program.Settings["Buy_From_Trader"]) && item.BuyFromTrader != null)
+                            if (_appSettings.BuyFromTrader && item.BuyFromTrader != null)
                             {
                                 sb.Append(string.Format("\nBuy From Trader : {0}", item.BuyFromTrader));
                                 sb.Append(string.Format("\nBuy From Trader Price : {0}\n", item.BuyFromTraderPrice.Replace(" ", "").Replace(@"~", @" ≈")));
                             }
-                            if (Convert.ToBoolean(Program.Settings["Needs"]) && item.Needs != null)
+                            if (_appSettings.Needs && item.Needs != null)
                             {
                                 sb.Append(string.Format("\nNeeds :\n{0}\n", item.Needs));
                             }
-                            if (Convert.ToBoolean(Program.Settings["Barters_and_Crafts"]) && item.Bartersandcrafts != null)
+                            if (_appSettings.BartersNCrafts && item.Bartersandcrafts != null)
                             {
                                 sb.Append(string.Format("\nBarters & Crafts :\n{0}\n", item.Bartersandcrafts));
                             }
@@ -194,20 +197,6 @@ namespace TarkovPriceChecker
                 }
             };
             Invoke(show);
-        }
-
-        public DataGridViewRow CheckItemExist(Item item)
-        {
-            DataGridViewRow? value = null;
-            foreach (DataGridViewRow r in ItemCompareGrid.Rows)
-            {
-                if ((item.IsName2 ? item.NameDisplay2 : item.NameDisplay).Equals(r.Cells[0].Value))
-                {
-                    value = r;
-                    break;
-                }
-            }
-            return value;
         }
 
         public void SetTextColors(Item item)

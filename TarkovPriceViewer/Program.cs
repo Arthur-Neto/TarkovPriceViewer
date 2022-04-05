@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 using System.Globalization;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using TarkovPriceChecker;
 using TarkovPriceViewer.Extensions;
@@ -15,12 +14,9 @@ namespace TarkovPriceViewer
     {
         public static bool FinishLoadingBallistics = false;
 
-        public static Dictionary<string, string> Settings = new Dictionary<string, string>();
         public static readonly List<Item> ItemList = new List<Item>();
         public static readonly Dictionary<string, Ballistic> DicBallistic = new Dictionary<string, Ballistic>();
         public static readonly HashSet<string> BEType = new HashSet<string> { "Round", "Slug", "Buckshot", "Grenade launcher cartridge" };
-
-        public static readonly string SettingsPath = @"settings.json";
 
         public static void ConfigureServices(IServiceCollection services)
         {
@@ -29,6 +25,7 @@ namespace TarkovPriceViewer
             services.AddScoped<MainForm>();
             services.AddScoped<InfoOverlay>();
             services.AddScoped<CompareOverlay>();
+            services.AddScoped<KeyPressCheck>();
 
             services.AddLocalization(o => o.ResourcesPath = "Properties/Resources");
             services.Configure<RequestLocalizationOptions>(options =>
@@ -70,92 +67,7 @@ namespace TarkovPriceViewer
             Debug.WriteLine("itemlist Count : " + ItemList.Count);
         }
 
-        public static void LoadSettings()
-        {
-            try
-            {
-                if (!File.Exists(SettingsPath))
-                {
-                    File.Create(SettingsPath).Dispose();
-                }
-                var text = File.ReadAllText(SettingsPath);
-                try
-                {
-                    Settings = JsonSerializer.Deserialize<Dictionary<string, string>>(text);
-                }
-                catch (JsonException je)
-                {
-                    Debug.WriteLine(je.Message);
-                    text = "{}";
-                    Settings = JsonSerializer.Deserialize<Dictionary<string, string>>(text);
-                }
-
-                Settings.Remove("Version");//force
-                Settings.Add("Version", "v1.16");//force
-
-                if (!Settings.TryGetValue("MinimizetoTrayWhenStartup", out var st))
-                {
-                    Settings.Add("MinimizetoTrayWhenStartup", "false");
-                }
-                if (!Settings.TryGetValue("CloseOverlayWhenMouseMoved", out st))
-                {
-                    Settings.Add("CloseOverlayWhenMouseMoved", "true");
-                }
-                if (!Settings.TryGetValue("RandomItem", out st))
-                {
-                    Settings.Add("RandomItem", "false");//false
-                }
-                if (!Settings.TryGetValue("ShowOverlay_Key", out st))
-                {
-                    Settings.Add("ShowOverlay_Key", "120");
-                }
-                if (!Settings.TryGetValue("HideOverlay_Key", out st))
-                {
-                    Settings.Add("HideOverlay_Key", "121");
-                }
-                if (!Settings.TryGetValue("CompareOverlay_Key", out st))
-                {
-                    Settings.Add("CompareOverlay_Key", "119");
-                }
-                if (!Settings.TryGetValue("Overlay_Transparent", out st))
-                {
-                    Settings.Add("Overlay_Transparent", "80");
-                }
-                if (!Settings.TryGetValue("Show_Last_Price", out st))
-                {
-                    Settings.Add("Show_Last_Price", "true");
-                }
-                if (!Settings.TryGetValue("Show_Day_Price", out st))
-                {
-                    Settings.Add("Show_Day_Price", "true");
-                }
-                if (!Settings.TryGetValue("Show_Week_Price", out st))
-                {
-                    Settings.Add("Show_Week_Price", "true");
-                }
-                if (!Settings.TryGetValue("Sell_to_Trader", out st))
-                {
-                    Settings.Add("Sell_to_Trader", "true");
-                }
-                if (!Settings.TryGetValue("Buy_From_Trader", out st))
-                {
-                    Settings.Add("Buy_From_Trader", "true");
-                }
-                if (!Settings.TryGetValue("Needs", out st))
-                {
-                    Settings.Add("Needs", "true");
-                }
-                if (!Settings.TryGetValue("Barters_and_Crafts", out st))
-                {
-                    Settings.Add("Barters_and_Crafts", "true");
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.Message);
-            }
-        }
-
+        /*
         public static void SaveSettings()
         {
             try
@@ -171,7 +83,7 @@ namespace TarkovPriceViewer
             {
                 Debug.WriteLine(e.Message);
             }
-        }
+        }*/
 
         public static void GetBallistics()
         {
