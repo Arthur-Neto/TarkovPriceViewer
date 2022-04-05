@@ -1,6 +1,6 @@
 ﻿namespace TarkovPriceViewer.Infrastructure.Settings
 {
-    public class AppSettings
+    public class SettingsOptions
     {
         public bool MinimizetoTrayWhenStartup { get; set; } = false;
         public bool CloseOverlayWhenMouseMoved { get; set; } = true;

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+﻿using TarkovPriceViewer.Infrastructure.JsonWriter;
 using TarkovPriceViewer.Infrastructure.Settings;
 
 namespace TarkovPriceViewer.Forms
@@ -7,13 +7,15 @@ namespace TarkovPriceViewer.Forms
     {
         public int Button { get; set; }
 
-        private readonly AppSettings _appSettings;
+        private readonly IWritableOptions<SettingsOptions> _writableOptions;
 
-        public KeyPressCheck(IOptions<AppSettings> options)
+        public KeyPressCheck(
+            IWritableOptions<SettingsOptions> writableOptions
+        )
         {
             InitializeComponent();
 
-            _appSettings = options.Value;
+            _writableOptions = writableOptions;
         }
 
         private void KeyPressCheckFormClosed(object sender, FormClosedEventArgs e)
@@ -30,16 +32,26 @@ namespace TarkovPriceViewer.Forms
             {
                 if (e.KeyCode != Keys.Escape)
                 {
+                    var keyCode = ((int)e.KeyCode).ToString();
                     switch (Button)
                     {
                         case 1:
-                            //Program.Settings["ShowOverlay_Key"] = ((int)e.KeyCode).ToString();
+                            _writableOptions.Update(opt =>
+                            {
+                                opt.ShowOverlayKey = keyCode;
+                            });
                             break;
                         case 2:
-                            //Program.Settings["HideOverlay_Key"] = ((int)e.KeyCode).ToString();
+                            _writableOptions.Update(opt =>
+                            {
+                                opt.HideOverlayKey = keyCode;
+                            });
                             break;
                         case 3:
-                            //Program.Settings["CompareOverlay_Key"] = ((int)e.KeyCode).ToString();
+                            _writableOptions.Update(opt =>
+                            {
+                                opt.CompareOverlayKey = keyCode;
+                            });
                             break;
                     }
 

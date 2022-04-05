@@ -1,57 +1,57 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.Extensions.DependencyInjection;
-using System.Globalization;
-using TarkovPriceViewer.Extensions;
+﻿using Microsoft.Extensions.Hosting;
+using System.Diagnostics;
+using System.Reflection;
 using TarkovPriceViewer.Forms;
-using TarkovPriceViewer.Infrastructure.Services;
+using WindowsFormsLifetime;
 
 namespace TarkovPriceViewer
 {
     public static class Program
     {
-        public static void ConfigureServices(IServiceCollection services)
+        public static readonly string VERSION = Assembly.GetEntryAssembly().GetName().Version.ToString();
+
+        [STAThread]
+        private static void Main(string[] args)
         {
-            services.RegisterLogger();
-
-            services.AddMemoryCache();
-
-            services.AddScoped<MainForm>();
-            services.AddScoped<InfoOverlay>();
-            services.AddScoped<CompareOverlay>();
-            services.AddScoped<KeyPressCheck>();
-            services.AddScoped<IItemService, ItemService>();
-            services.AddScoped<IBallisticService, BallisticService>();
-
-            services.AddLocalization(o => o.ResourcesPath = "Properties/Resources");
-            services.Configure<RequestLocalizationOptions>(options =>
+            // ??
+            foreach (var process in Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName))
             {
-                var supportedCultures = new[]
+                if (process.Id == Process.GetCurrentProcess().Id)
                 {
-                new CultureInfo("en-US"),
-            };
-                options.DefaultRequestCulture = new RequestCulture("en-US", "en-US");
-                options.SupportedCultures = supportedCultures;
-                options.SupportedUICultures = supportedCultures;
-            });
+                    continue;
+                }
+                try
+                {
+                    process.Kill();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+
+            ThreadPool.SetMinThreads(10, 10);
+            ThreadPool.SetMaxThreads(20, 20);
+
+            CreateHostBuilder(args)
+                .UseEnvironment("Production")
+                .Build()
+                .Run();
         }
 
-        /*
-        public static void SaveSettings()
-        {
-            try
-            {
-                if (!File.Exists(SettingsPath))
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .UseWindowsFormsLifetime<MainForm>(options =>
                 {
-                    File.Create(SettingsPath).Dispose();
-                }
-                var jsonString = JsonSerializer.Serialize(Settings);
-                File.WriteAllText(SettingsPath, jsonString.Replace(",", ",\n"));
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.Message);
-            }
-        }*/
+                    options.HighDpiMode = HighDpiMode.SystemAware;
+                    options.EnableVisualStyles = true;
+                    options.CompatibleTextRenderingDefault = false;
+                    options.SuppressStatusMessages = false;
+                    options.EnableConsoleShutdown = true;
+                })
+                .ConfigureServices((hostContext, services) =>
+                {
+                    services.ConfigureServices();
+                });
     }
 }

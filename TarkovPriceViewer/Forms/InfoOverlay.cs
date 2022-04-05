@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Localization;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Runtime.InteropServices;
@@ -39,26 +40,29 @@ namespace TarkovPriceViewer.Forms
 
         private readonly IStringLocalizer<Resources> _resources;
         private readonly ILogger<InfoOverlay> _logger;
-        private readonly AppSettings _appSettings;
+        private readonly IServiceProvider _serviceProvider;
 
         private readonly object _lock = new object();
 
         public InfoOverlay(
             IStringLocalizer<Resources> resources,
             ILogger<InfoOverlay> logger,
-            IOptions<AppSettings> options
+            IServiceProvider serviceProvider
         )
         {
             InitializeComponent();
 
             _resources = resources;
             _logger = logger;
-            _appSettings = options.Value;
+            _serviceProvider = serviceProvider;
 
             TopMost = true;
 
+            using var scope = _serviceProvider.CreateScope();
+            var options = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<SettingsOptions>>().Value;
+
             var style = GetWindowLong(Handle, GWL_EXSTYLE);
-            Opacity = int.Parse(_appSettings.OverlayTransparency) * 0.01;
+            Opacity = int.Parse(options.OverlayTransparency) * 0.01;
             SetWindowLong(Handle, GWL_EXSTYLE, style | WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT);
 
             SettingFormPos();
@@ -145,35 +149,38 @@ namespace TarkovPriceViewer.Forms
                         }
                         else
                         {
+                            using var scope = _serviceProvider.CreateScope();
+                            var options = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<SettingsOptions>>().Value;
+
                             var sb = new StringBuilder();
                             sb.Append(string.Format("Name : {0}\n\n", item.IsName2 ? item.NameDisplay2 : item.NameDisplay));
-                            if (_appSettings.ShowLastPrice)
+                            if (options.ShowLastPrice)
                             {
                                 sb.Append(string.Format("Last Price : {0} ({1})\n", item.PriceLast, item.LastUpdate));
                             }
-                            if (_appSettings.ShowDayPrice && item.PriceDay != null)
+                            if (options.ShowDayPrice && item.PriceDay != null)
                             {
                                 sb.Append(string.Format("Day Price : {0}\n", item.PriceDay));
                             }
-                            if (_appSettings.ShowWeekPrice && item.PriceWeek != null)
+                            if (options.ShowWeekPrice && item.PriceWeek != null)
                             {
                                 sb.Append(string.Format("Week Price : {0}\n", item.PriceWeek));
                             }
-                            if (_appSettings.SellToTrader && item.SellToTrader != null)
+                            if (options.SellToTrader && item.SellToTrader != null)
                             {
                                 sb.Append(string.Format("\nSell to Trader : {0}", item.SellToTrader));
                                 sb.Append(string.Format("\nSell to Trader Price : {0}\n", item.SellToTraderPrice));
                             }
-                            if (_appSettings.BuyFromTrader && item.BuyFromTrader != null)
+                            if (options.BuyFromTrader && item.BuyFromTrader != null)
                             {
                                 sb.Append(string.Format("\nBuy From Trader : {0}", item.BuyFromTrader));
                                 sb.Append(string.Format("\nBuy From Trader Price : {0}\n", item.BuyFromTraderPrice.Replace(" ", "").Replace(@"~", @" ≈")));
                             }
-                            if (_appSettings.Needs && item.Needs != null)
+                            if (options.Needs && item.Needs != null)
                             {
                                 sb.Append(string.Format("\nNeeds :\n{0}\n", item.Needs));
                             }
-                            if (_appSettings.BartersNCrafts && item.BartersNCrafts != null)
+                            if (options.BartersNCrafts && item.BartersNCrafts != null)
                             {
                                 sb.Append(string.Format("\nBarters & Crafts :\n{0}\n", item.BartersNCrafts));
                             }
