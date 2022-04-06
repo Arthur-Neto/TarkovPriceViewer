@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using TarkovPriceViewer.Forms;
 using WindowsFormsLifetime;
@@ -13,6 +14,12 @@ namespace TarkovPriceViewer
         [STAThread]
         private static void Main(string[] args)
         {
+            var culture = new CultureInfo("en-US");
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
+            Thread.CurrentThread.CurrentCulture = culture;
+
             // ??
             foreach (var process in Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName))
             {
@@ -34,14 +41,18 @@ namespace TarkovPriceViewer
             ThreadPool.SetMaxThreads(20, 20);
 
             CreateHostBuilder(args)
-                .UseEnvironment("Production")
-                .Build()
-                .Run();
+               .UseEnvironment("Production")
+               .Build()
+               .Run();
         }
 
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
+                .ConfigureServices((hostContext, services) =>
+                {
+                    services.ConfigureServices();
+                })
                 .UseWindowsFormsLifetime<MainForm>(options =>
                 {
                     options.HighDpiMode = HighDpiMode.SystemAware;
@@ -49,10 +60,6 @@ namespace TarkovPriceViewer
                     options.CompatibleTextRenderingDefault = false;
                     options.SuppressStatusMessages = false;
                     options.EnableConsoleShutdown = true;
-                })
-                .ConfigureServices((hostContext, services) =>
-                {
-                    services.ConfigureServices();
                 });
         }
     }

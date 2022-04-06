@@ -30,8 +30,9 @@ namespace TarkovPriceViewer
             services.AddScoped<KeyPressCheck>();
             services.AddScoped<IItemService, ItemService>();
             services.AddScoped<IBallisticService, BallisticService>();
+            services.AddScoped<IResourcesService, ResourcesService>();
 
-            services.AddLocalization(o => o.ResourcesPath = "Properties/Resources");
+            services.AddLocalization(o => o.ResourcesPath = "Resources/Resource");
             services.Configure<RequestLocalizationOptions>(options =>
             {
                 var supportedCultures = new[]

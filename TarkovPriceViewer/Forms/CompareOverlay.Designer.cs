@@ -35,7 +35,7 @@ namespace TarkovPriceViewer.Forms
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             this.ItemComparePanel = new System.Windows.Forms.Panel();
-            this.itemcompare_text = new System.Windows.Forms.RichTextBox();
+            this.ItemCompareTxt = new System.Windows.Forms.RichTextBox();
             this.ItemCompareGrid = new System.Windows.Forms.DataGridView();
             this.ItemComparePanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ItemCompareGrid)).BeginInit();
@@ -49,7 +49,7 @@ namespace TarkovPriceViewer.Forms
             this.ItemComparePanel.AutoSize = true;
             this.ItemComparePanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ItemComparePanel.BackColor = System.Drawing.Color.Black;
-            this.ItemComparePanel.Controls.Add(this.itemcompare_text);
+            this.ItemComparePanel.Controls.Add(this.ItemCompareTxt);
             this.ItemComparePanel.Controls.Add(this.ItemCompareGrid);
             this.ItemComparePanel.ForeColor = System.Drawing.Color.Black;
             this.ItemComparePanel.Location = new System.Drawing.Point(12, 119);
@@ -64,25 +64,25 @@ namespace TarkovPriceViewer.Forms
             // 
             // itemcompare_text
             // 
-            this.itemcompare_text.BackColor = System.Drawing.Color.Black;
-            this.itemcompare_text.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.itemcompare_text.Cursor = System.Windows.Forms.Cursors.SizeAll;
-            this.itemcompare_text.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.itemcompare_text.ForeColor = System.Drawing.Color.White;
-            this.itemcompare_text.Location = new System.Drawing.Point(10, 16);
-            this.itemcompare_text.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.itemcompare_text.Name = "itemcompare_text";
-            this.itemcompare_text.ReadOnly = true;
-            this.itemcompare_text.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.itemcompare_text.Size = new System.Drawing.Size(100, 25);
-            this.itemcompare_text.TabIndex = 0;
-            this.itemcompare_text.TabStop = false;
-            this.itemcompare_text.Text = "text";
-            this.itemcompare_text.WordWrap = false;
-            this.itemcompare_text.ContentsResized += new System.Windows.Forms.ContentsResizedEventHandler(this.ItemWindowTextContentsResized);
-            this.itemcompare_text.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ItemCompareTextMouseDown);
-            this.itemcompare_text.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ItemCompareTextMouseMove);
-            this.itemcompare_text.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ItemCompareTextMouseUp);
+            this.ItemCompareTxt.BackColor = System.Drawing.Color.Black;
+            this.ItemCompareTxt.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ItemCompareTxt.Cursor = System.Windows.Forms.Cursors.SizeAll;
+            this.ItemCompareTxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.ItemCompareTxt.ForeColor = System.Drawing.Color.White;
+            this.ItemCompareTxt.Location = new System.Drawing.Point(10, 16);
+            this.ItemCompareTxt.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.ItemCompareTxt.Name = "itemcompare_text";
+            this.ItemCompareTxt.ReadOnly = true;
+            this.ItemCompareTxt.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.ItemCompareTxt.Size = new System.Drawing.Size(100, 25);
+            this.ItemCompareTxt.TabIndex = 0;
+            this.ItemCompareTxt.TabStop = false;
+            this.ItemCompareTxt.Text = "text";
+            this.ItemCompareTxt.WordWrap = false;
+            this.ItemCompareTxt.ContentsResized += new System.Windows.Forms.ContentsResizedEventHandler(this.ItemWindowTextContentsResized);
+            this.ItemCompareTxt.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ItemCompareTextMouseDown);
+            this.ItemCompareTxt.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ItemCompareTextMouseMove);
+            this.ItemCompareTxt.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ItemCompareTextMouseUp);
             // 
             // ItemCompareGrid
             // 
@@ -200,6 +200,6 @@ namespace TarkovPriceViewer.Forms
         #endregion
         private System.Windows.Forms.Panel ItemComparePanel;
         private System.Windows.Forms.DataGridView ItemCompareGrid;
-        private System.Windows.Forms.RichTextBox itemcompare_text;
+        private System.Windows.Forms.RichTextBox ItemCompareTxt;
     }
 }

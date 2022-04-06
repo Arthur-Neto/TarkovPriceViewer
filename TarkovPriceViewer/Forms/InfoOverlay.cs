@@ -1,13 +1,12 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using TarkovPriceViewer.Infrastructure.Entities;
+using TarkovPriceViewer.Infrastructure.Services;
 using TarkovPriceViewer.Infrastructure.Settings;
-using TarkovPriceViewer.Properties;
 
 namespace TarkovPriceViewer.Forms
 {
@@ -38,14 +37,14 @@ namespace TarkovPriceViewer.Forms
             ColorTranslator.FromHtml("#009900")
         };
 
-        private readonly IStringLocalizer<Resources> _resources;
+        private readonly IResourcesService _resources;
         private readonly ILogger<InfoOverlay> _logger;
         private readonly IServiceProvider _serviceProvider;
 
         private readonly object _lock = new object();
 
         public InfoOverlay(
-            IStringLocalizer<Resources> resources,
+            IResourcesService resources,
             ILogger<InfoOverlay> logger,
             IServiceProvider serviceProvider
         )
@@ -141,11 +140,11 @@ namespace TarkovPriceViewer.Forms
                     {
                         if (item == null || item.MarketAddress == null)
                         {
-                            itemInfoText.Text = _resources["NotFound"];
+                            itemInfoText.Text = _resources.GetString("NotFound");
                         }
                         else if (item.PriceLast == null)
                         {
-                            itemInfoText.Text = _resources["NoFlea"];
+                            itemInfoText.Text = _resources.GetString("NoFlea");
                         }
                         else
                         {
@@ -242,15 +241,15 @@ namespace TarkovPriceViewer.Forms
             }
         }
 
-        public void ShowLoadingInfo(Point point, CancellationToken cts_one)
+        public void ShowLoadingInfo(Point point, CancellationToken cancellationToken)
         {
             Action show = delegate ()
             {
-                if (!cts_one.IsCancellationRequested)
+                if (!cancellationToken.IsCancellationRequested)
                 {
                     itemInfoBall.Rows.Clear();
                     itemInfoBall.Visible = false;
-                    itemInfoText.Text = _resources["Loading"];
+                    itemInfoText.Text = _resources.GetString("Loading");
                     itemInfoPanel.Location = point;
                     itemInfoPanel.Visible = true;
                 }
@@ -266,7 +265,7 @@ namespace TarkovPriceViewer.Forms
                 {
                     itemInfoBall.Rows.Clear();
                     itemInfoBall.Visible = false;
-                    itemInfoText.Text = _resources["NotFinishLoading"];
+                    itemInfoText.Text = _resources.GetString("NotFinishLoading");
                     itemInfoPanel.Location = point;
                     itemInfoPanel.Visible = true;
                 }

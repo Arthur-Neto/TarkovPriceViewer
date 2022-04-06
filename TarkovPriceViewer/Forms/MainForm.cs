@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenCvSharp;
@@ -12,7 +11,6 @@ using TarkovPriceViewer.Infrastructure.Entities;
 using TarkovPriceViewer.Infrastructure.JsonWriter;
 using TarkovPriceViewer.Infrastructure.Services;
 using TarkovPriceViewer.Infrastructure.Settings;
-using TarkovPriceViewer.Properties;
 using Tesseract;
 
 namespace TarkovPriceViewer.Forms
@@ -119,7 +117,6 @@ namespace TarkovPriceViewer.Forms
         private readonly IServiceProvider _serviceProvider;
         private readonly IBallisticService _ballisticService;
         private readonly IItemService _itemService;
-        private readonly IStringLocalizer<Resources> _resources;
         private readonly IWritableOptions<SettingsOptions> _writableOptions;
 
         public MainForm(
@@ -130,7 +127,6 @@ namespace TarkovPriceViewer.Forms
             IServiceProvider serviceProvider,
             IBallisticService ballisticService,
             IItemService itemService,
-            IStringLocalizer<Resources> resources,
             IWritableOptions<SettingsOptions> writableOptions
         )
         {
@@ -159,7 +155,6 @@ namespace TarkovPriceViewer.Forms
             _overlayCompare.Owner = this;
             _overlayCompare.Show();
 
-            _resources = resources;
             _writableOptions = writableOptions;
             _logger = logger;
 
@@ -194,7 +189,7 @@ namespace TarkovPriceViewer.Forms
             TransparentText.Text = _transparency;
 
             TrayIcon.Visible = true;
-            checkIdleTime.Start();
+            CheckIdleTime.Start();
         }
 
         private void SetHook()
@@ -452,14 +447,20 @@ namespace TarkovPriceViewer.Forms
 
         private IntPtr CheckIsTarkov()
         {
+            _logger.LogInformation("Checking if is Tarkov running");
+
             var hWnd = GetForegroundWindow();
             if (hWnd != IntPtr.Zero)
             {
+                _logger.LogInformation("ForegroundWindow pointer: {HWND}", hWnd);
+
                 var sbWinText = new StringBuilder(260);
 
                 GetWindowText(hWnd, sbWinText, 260);
 
-                if (sbWinText.ToString().Equals(_resources["AppName"]))
+                _logger.LogInformation("Window text: {WindowText}", sbWinText);
+
+                if (sbWinText.ToString().Equals("EscapeFromTarkov"))
                 {
                     return hWnd;
                 }
@@ -474,8 +475,8 @@ namespace TarkovPriceViewer.Forms
         {
             if (hWnd != IntPtr.Zero)
             {
-                using var Graphicsdata = Graphics.FromHwnd(hWnd);
-                var rect = Rectangle.Round(Graphicsdata.VisibleClipBounds);
+                using var graphicsData = Graphics.FromHwnd(hWnd);
+                var rect = Rectangle.Round(graphicsData.VisibleClipBounds);
                 var bmp = new Bitmap(rect.Width, rect.Height);
                 using (var g = Graphics.FromImage(bmp))
                 {
@@ -947,22 +948,22 @@ namespace TarkovPriceViewer.Forms
             }
         }
 
-        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        private void MainFormFormClosed(object sender, FormClosedEventArgs e)
         {
             CloseApp();
         }
 
-        private void TrayExit_Click(object sender, EventArgs e)
+        private void TrayExitClick(object sender, EventArgs e)
         {
             CloseApp();
         }
 
-        private void TrayShow_Click(object sender, EventArgs e)
+        private void TrayShowClick(object sender, EventArgs e)
         {
             Show();
         }
 
-        private void TrayIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void TrayIconMouseDoubleClick(object sender, MouseEventArgs e)
         {
             Show();
         }

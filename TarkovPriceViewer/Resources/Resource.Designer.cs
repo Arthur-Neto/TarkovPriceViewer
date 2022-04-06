@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TarkovPriceViewer.Properties {
+namespace TarkovPriceViewer.Resources {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace TarkovPriceViewer.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class Resources {
+    public class Resource {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources() {
+        internal Resource() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace TarkovPriceViewer.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TarkovPriceViewer.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TarkovPriceViewer.Resources.Resource", typeof(Resource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,16 +61,7 @@ namespace TarkovPriceViewer.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to EscapeFromTarkov.
-        /// </summary>
-        public static string AppName {
-            get {
-                return ResourceManager.GetString("AppName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Loading.
+        ///   Looks up a localized string similar to Loading....
         /// </summary>
         public static string Loading {
             get {
@@ -79,7 +70,7 @@ namespace TarkovPriceViewer.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Item not Found on Flea..
+        ///   Looks up a localized string similar to Item not found on Flea..
         /// </summary>
         public static string NoFlea {
             get {
@@ -88,7 +79,7 @@ namespace TarkovPriceViewer.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Wait for Loading Data. Please Check Your Internet, and Check Tarkov Wiki Site..
+        ///   Looks up a localized string similar to Wait for loading data. Please check your Internet, and check Tarkov wiki site..
         /// </summary>
         public static string NotFinishLoading {
             get {
@@ -97,7 +88,7 @@ namespace TarkovPriceViewer.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Item Name Not Found..
+        ///   Looks up a localized string similar to Item name not found..
         /// </summary>
         public static string NotFound {
             get {
@@ -106,7 +97,7 @@ namespace TarkovPriceViewer.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please Press Compare Key..
+        ///   Looks up a localized string similar to Please press compare key..
         /// </summary>
         public static string PressCompareKey {
             get {

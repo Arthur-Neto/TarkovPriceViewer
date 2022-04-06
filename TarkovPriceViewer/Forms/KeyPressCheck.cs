@@ -26,7 +26,7 @@ namespace TarkovPriceViewer.Forms
             }
         }
 
-        private void KeyPressCheck_KeyUp(object sender, KeyEventArgs e)
+        private void KeyPressCheckKeyUp(object sender, KeyEventArgs e)
         {
             if (e.KeyCode is not Keys.ShiftKey and not Keys.Menu and not Keys.ControlKey)
             {
