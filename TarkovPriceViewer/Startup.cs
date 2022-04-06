@@ -1,8 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Globalization;
 using TarkovPriceViewer.Extensions;
 using TarkovPriceViewer.Forms;
 using TarkovPriceViewer.Infrastructure.Services;
@@ -30,19 +27,6 @@ namespace TarkovPriceViewer
             services.AddScoped<KeyPressCheck>();
             services.AddScoped<IItemService, ItemService>();
             services.AddScoped<IBallisticService, BallisticService>();
-            services.AddScoped<IResourcesService, ResourcesService>();
-
-            services.AddLocalization(o => o.ResourcesPath = "Resources/Resource");
-            services.Configure<RequestLocalizationOptions>(options =>
-            {
-                var supportedCultures = new[]
-                {
-                new CultureInfo("en-US"),
-            };
-                options.DefaultRequestCulture = new RequestCulture("en-US", "en-US");
-                options.SupportedCultures = supportedCultures;
-                options.SupportedUICultures = supportedCultures;
-            });
         }
     }
 }

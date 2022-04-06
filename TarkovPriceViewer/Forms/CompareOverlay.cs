@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using TarkovPriceViewer.Infrastructure.Constants;
 using TarkovPriceViewer.Infrastructure.Entities;
-using TarkovPriceViewer.Infrastructure.Services;
+using TarkovPriceViewer.Resources;
 
 namespace TarkovPriceViewer.Forms
 {
@@ -23,19 +23,16 @@ namespace TarkovPriceViewer.Forms
         private static bool _isMoving = false;
         private static int _x, _y;
 
-        private readonly IResourcesService _resources;
         private readonly ILogger<CompareOverlay> _logger;
 
         private readonly object _lock = new object();
 
         public CompareOverlay(
-            IResourcesService resources,
             ILogger<CompareOverlay> logger
         )
         {
             InitializeComponent();
 
-            _resources = resources;
             _logger = logger;
 
             TopMost = true;
@@ -119,11 +116,11 @@ namespace TarkovPriceViewer.Forms
                         {
                             if (--_compareSize > 0)
                             {
-                                ItemCompareTxt.Text = string.Format("{0} Left : {1}", _resources.GetString("Loading"), _compareSize);
+                                ItemCompareTxt.Text = string.Format("{0} Left : {1}", Resource.Loading, _compareSize);
                             }
                             else
                             {
-                                ItemCompareTxt.Text = string.Format("{0}", _resources.GetString("PressCompareKey"));
+                                ItemCompareTxt.Text = string.Format("{0}", Resource.PressCompareKey);
                             }
                         }
                     }
@@ -161,10 +158,10 @@ namespace TarkovPriceViewer.Forms
                             ResizeGrid(ItemCompareGrid);
                             ItemComparePanel.Location = point;
                             ItemComparePanel.Visible = true;
-                            ItemCompareTxt.Text = string.Format("{0}", _resources.GetString("PressCompareKey"));
+                            ItemCompareTxt.Text = string.Format("{0}", Resource.PressCompareKey);
                         }
 
-                        ItemCompareTxt.Text = string.Format("{0} Left : {1}", _resources.GetString("Loading"), ++_compareSize);
+                        ItemCompareTxt.Text = string.Format("{0} Left : {1}", Resource.Loading, ++_compareSize);
                     }
                 }
             };

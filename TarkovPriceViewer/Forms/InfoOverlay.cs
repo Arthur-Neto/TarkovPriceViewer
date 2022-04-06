@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using TarkovPriceViewer.Infrastructure.Entities;
-using TarkovPriceViewer.Infrastructure.Services;
 using TarkovPriceViewer.Infrastructure.Settings;
+using TarkovPriceViewer.Resources;
 
 namespace TarkovPriceViewer.Forms
 {
@@ -37,21 +37,18 @@ namespace TarkovPriceViewer.Forms
             ColorTranslator.FromHtml("#009900")
         };
 
-        private readonly IResourcesService _resources;
         private readonly ILogger<InfoOverlay> _logger;
         private readonly IServiceProvider _serviceProvider;
 
         private readonly object _lock = new object();
 
         public InfoOverlay(
-            IResourcesService resources,
             ILogger<InfoOverlay> logger,
             IServiceProvider serviceProvider
         )
         {
             InitializeComponent();
 
-            _resources = resources;
             _logger = logger;
             _serviceProvider = serviceProvider;
 
@@ -140,11 +137,11 @@ namespace TarkovPriceViewer.Forms
                     {
                         if (item == null || item.MarketAddress == null)
                         {
-                            itemInfoText.Text = _resources.GetString("NotFound");
+                            itemInfoText.Text = Resource.NotFound;
                         }
                         else if (item.PriceLast == null)
                         {
-                            itemInfoText.Text = _resources.GetString("NoFlea");
+                            itemInfoText.Text = Resource.NoFlea;
                         }
                         else
                         {
@@ -249,7 +246,7 @@ namespace TarkovPriceViewer.Forms
                 {
                     itemInfoBall.Rows.Clear();
                     itemInfoBall.Visible = false;
-                    itemInfoText.Text = _resources.GetString("Loading");
+                    itemInfoText.Text = Resource.Loading;
                     itemInfoPanel.Location = point;
                     itemInfoPanel.Visible = true;
                 }
@@ -265,7 +262,7 @@ namespace TarkovPriceViewer.Forms
                 {
                     itemInfoBall.Rows.Clear();
                     itemInfoBall.Visible = false;
-                    itemInfoText.Text = _resources.GetString("NotFinishLoading");
+                    itemInfoText.Text = Resource.NotFinishLoading;
                     itemInfoPanel.Location = point;
                     itemInfoPanel.Visible = true;
                 }
