@@ -55,11 +55,11 @@ namespace TarkovPriceViewer.Forms
         public void InitializeCompareData()
         {
             ItemCompareGrid.ColumnCount = 7;
-            ItemCompareGrid.Columns[0].Name = "Name";
-            ItemCompareGrid.Columns[1].Name = "Recoil";
-            ItemCompareGrid.Columns[2].Name = "Accuracy";
-            ItemCompareGrid.Columns[3].Name = "Ergo";
-            ItemCompareGrid.Columns[4].Name = "Flea";
+            ItemCompareGrid.Columns[0].Name = Resource.Name;
+            ItemCompareGrid.Columns[1].Name = Resource.Recoil;
+            ItemCompareGrid.Columns[2].Name = Resource.Accuracy;
+            ItemCompareGrid.Columns[3].Name = Resource.Ergo;
+            ItemCompareGrid.Columns[4].Name = Resource.Flea;
             ItemCompareGrid.Columns[5].Name = "NPC";
             ItemCompareGrid.Columns[6].Name = "LL";
             ItemCompareGrid.Visible = false;
@@ -75,8 +75,8 @@ namespace TarkovPriceViewer.Forms
                 return;
             }
 
-            int.TryParse(string.Join("", e.CellValue1.ToString().Replace(",", "").Split(Currencies.AllCurrencies)), out var s1);
-            int.TryParse(string.Join("", e.CellValue2.ToString().Replace(",", "").Split(Currencies.AllCurrencies)), out var s2);
+            int.TryParse(string.Join(string.Empty, e.CellValue1.ToString().Replace(",", string.Empty).Split(Currencies.AllCurrencies)), out var s1);
+            int.TryParse(string.Join(string.Empty, e.CellValue2.ToString().Replace(",", string.Empty).Split(Currencies.AllCurrencies)), out var s2);
             e.SortResult = s1.CompareTo(s2);
             e.Handled = true;
         }
@@ -116,7 +116,7 @@ namespace TarkovPriceViewer.Forms
                         {
                             if (--_compareSize > 0)
                             {
-                                ItemCompareTxt.Text = string.Format("{0} Left : {1}", Resource.Loading, _compareSize);
+                                ItemCompareTxt.Text = string.Format(Resource.OverlayCompareTxt, Resource.Loading, _compareSize);
                             }
                             else
                             {
@@ -161,7 +161,7 @@ namespace TarkovPriceViewer.Forms
                             ItemCompareTxt.Text = string.Format("{0}", Resource.PressCompareKey);
                         }
 
-                        ItemCompareTxt.Text = string.Format("{0} Left : {1}", Resource.Loading, ++_compareSize);
+                        ItemCompareTxt.Text = string.Format(Resource.OverlayCompareTxt, Resource.Loading, ++_compareSize);
                     }
                 }
             };

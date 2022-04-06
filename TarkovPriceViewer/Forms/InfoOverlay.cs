@@ -76,9 +76,9 @@ namespace TarkovPriceViewer.Forms
         public void InitializeBallistics()
         {
             itemInfoBall.ColumnCount = 9;
-            itemInfoBall.Columns[0].Name = "Type";
-            itemInfoBall.Columns[1].Name = "Name";
-            itemInfoBall.Columns[2].Name = "Damage";
+            itemInfoBall.Columns[0].Name = Resource.Type;
+            itemInfoBall.Columns[1].Name = Resource.Name;
+            itemInfoBall.Columns[2].Name = Resource.Damage;
             itemInfoBall.Columns[3].Name = "1";
             itemInfoBall.Columns[4].Name = "2";
             itemInfoBall.Columns[5].Name = "3";
@@ -149,36 +149,54 @@ namespace TarkovPriceViewer.Forms
                             var options = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<SettingsOptions>>().Value;
 
                             var sb = new StringBuilder();
-                            sb.Append(string.Format("Name : {0}\n\n", item.IsName2 ? item.NameDisplay2 : item.NameDisplay));
+                            sb.Append(string.Format(Resource.OverlayInfoName, item.IsName2 ? item.NameDisplay2 : item.NameDisplay));
+                            sb.Append("\n\n");
                             if (options.ShowLastPrice)
                             {
-                                sb.Append(string.Format("Last Price : {0} ({1})\n", item.PriceLast, item.LastUpdate));
+                                sb.Append(string.Format(Resource.OverlayInfoLastPrice, item.PriceLast, item.LastUpdate));
+                                sb.Append("\n");
                             }
                             if (options.ShowDayPrice && item.PriceDay != null)
                             {
-                                sb.Append(string.Format("Day Price : {0}\n", item.PriceDay));
+                                sb.Append(string.Format(Resource.OverlayInfoDayPrice, item.PriceDay));
+                                sb.Append("\n");
                             }
                             if (options.ShowWeekPrice && item.PriceWeek != null)
                             {
-                                sb.Append(string.Format("Week Price : {0}\n", item.PriceWeek));
+                                sb.Append(string.Format(Resource.OverlayInfoWeekPrice, item.PriceWeek));
+                                sb.Append("\n");
                             }
                             if (options.SellToTrader && item.SellToTrader != null)
                             {
-                                sb.Append(string.Format("\nSell to Trader : {0}", item.SellToTrader));
-                                sb.Append(string.Format("\nSell to Trader Price : {0}\n", item.SellToTraderPrice));
+                                sb.Append("\n");
+                                sb.Append(string.Format(Resource.OverlayInfoSellToTrader, item.SellToTrader));
+                                sb.Append("\n");
+                                sb.Append(string.Format(Resource.OverlayInfoSellToTraderPrice, item.SellToTraderPrice));
+                                sb.Append("\n");
                             }
                             if (options.BuyFromTrader && item.BuyFromTrader != null)
                             {
-                                sb.Append(string.Format("\nBuy From Trader : {0}", item.BuyFromTrader));
-                                sb.Append(string.Format("\nBuy From Trader Price : {0}\n", item.BuyFromTraderPrice.Replace(" ", "").Replace(@"~", @" ≈")));
+                                sb.Append("\n");
+                                sb.Append(string.Format(Resource.OverlayInfoBuyFromTrader, item.BuyFromTrader));
+                                sb.Append("\n");
+                                sb.Append(string.Format(Resource.OverlayInfoBuyFromTraderPrice, item.BuyFromTraderPrice.Replace(" ", string.Empty).Replace(@"~", @" ≈")));
+                                sb.Append("\n");
                             }
                             if (options.Needs && item.Needs != null)
                             {
-                                sb.Append(string.Format("\nNeeds :\n{0}\n", item.Needs));
+                                sb.Append("\n");
+                                sb.Append(Resource.OverlayInfoNeeds);
+                                sb.Append("\n");
+                                sb.Append(string.Format("{0}", item.Needs));
+                                sb.Append("\n");
                             }
                             if (options.BartersNCrafts && item.BartersNCrafts != null)
                             {
-                                sb.Append(string.Format("\nBarters & Crafts :\n{0}\n", item.BartersNCrafts));
+                                sb.Append("\n");
+                                sb.Append(Resource.OverlayInfoBartersNCraft);
+                                sb.Append("\n");
+                                sb.Append(string.Format("{0}", item.BartersNCrafts));
+                                sb.Append("\n");
                             }
                             itemInfoText.Text = sb.ToString().Trim();
 

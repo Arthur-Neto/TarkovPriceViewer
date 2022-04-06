@@ -59,7 +59,7 @@ namespace TarkovPriceViewer.Infrastructure.Services
                                     var subBallisticList = new List<Ballistic>();
                                     foreach (var node in nodes)
                                     {
-                                        if (!node.GetAttributeValue("id", "").Equals(""))
+                                        if (!node.GetAttributeValue("id", string.Empty).Equals(string.Empty))
                                         {
                                             subBallisticList = new List<Ballistic>();
                                         }
@@ -73,44 +73,44 @@ namespace TarkovPriceViewer.Infrastructure.Services
                                                 first = 1;
                                             }
                                             var name = subNodes[first++].InnerText.Trim();
-                                            var special = "";
+                                            var special = string.Empty;
                                             if (name.EndsWith(" S T"))
                                             {
-                                                name = new Regex("(S T)$").Replace(name, "");
+                                                name = new Regex("(S T)$").Replace(name, string.Empty);
                                                 special = @"Subsonic & Tracer";
                                             }
                                             if (name.EndsWith(" T"))
                                             {
-                                                name = new Regex("T$").Replace(name, "");
+                                                name = new Regex("T$").Replace(name, string.Empty);
                                                 special = @"Tracer";
                                             }
                                             if (name.EndsWith(" S"))
                                             {
-                                                name = new Regex("S$").Replace(name, "");
+                                                name = new Regex("S$").Replace(name, string.Empty);
                                                 special = @"Subsonic";
                                             }
                                             if (name.EndsWith(" S T FM"))
                                             {
-                                                name = new Regex("(S T FM)$").Replace(name, "");
+                                                name = new Regex("(S T FM)$").Replace(name, string.Empty);
                                                 special = @"Subsonic & Tracer";
                                             }
                                             if (name.EndsWith(" T FM"))
                                             {
-                                                name = new Regex("T FM$").Replace(name, "");
+                                                name = new Regex("T FM$").Replace(name, string.Empty);
                                                 special = @"Tracer";
                                             }
                                             if (name.EndsWith(" S FM"))
                                             {
-                                                name = new Regex("S FM$").Replace(name, "");
+                                                name = new Regex("S FM$").Replace(name, string.Empty);
                                                 special = @"Subsonic";
                                             }
                                             if (name.EndsWith(" FM"))//must be last
                                             {
-                                                name = new Regex("FM$").Replace(name, "");
-                                                special = @"";
+                                                name = new Regex("FM$").Replace(name, string.Empty);
+                                                special = string.Empty;
                                             }
 
-                                            name = name.Replace("*", "").Trim();
+                                            name = name.Replace("*", string.Empty).Trim();
                                             var damage = subNodes[first++].InnerText.Trim();
                                             if (damage.Contains("x"))
                                             {

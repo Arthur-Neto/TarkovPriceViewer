@@ -11,6 +11,7 @@ using TarkovPriceViewer.Infrastructure.Entities;
 using TarkovPriceViewer.Infrastructure.JsonWriter;
 using TarkovPriceViewer.Infrastructure.Services;
 using TarkovPriceViewer.Infrastructure.Settings;
+using TarkovPriceViewer.Resources;
 using Tesseract;
 
 namespace TarkovPriceViewer.Forms
@@ -539,7 +540,7 @@ namespace TarkovPriceViewer.Forms
                             using var temp = screenMat.SubMat(rect2);
                             using var temp2 = temp.Threshold(0, 255, ThresholdTypes.BinaryInv);
                             var text = GetTesseract(temp2);
-                            if (!text.Equals(""))
+                            if (string.IsNullOrEmpty(text) is false)
                             {
                                 item = MatchItemName(text.ToLower().Trim().ToCharArray());
                                 break;
@@ -883,7 +884,7 @@ namespace TarkovPriceViewer.Forms
                                                         {
                                                             foreach (var temp2 in temp.ChildNodes)
                                                             {
-                                                                if (!temp2.InnerText.Trim().Equals(""))
+                                                                if (!temp2.InnerText.Trim().Equals(string.Empty))
                                                                 {
                                                                     craftList.Add(temp2.InnerText.Trim());
                                                                 }
@@ -1110,12 +1111,12 @@ namespace TarkovPriceViewer.Forms
                         sp = sp2[sp2.Length - 1].Trim();
                         if (Program.VERSION.Equals(sp) is false)
                         {
-                            MessageBox.Show($"New version ({sp}) found. Please download new version. Current Version is {Program.VERSION}");
+                            MessageBox.Show(string.Format(Resource.NewVersionFound, sp, Program.VERSION));
                             Process.Start(Links.GITHUB_REPO);
                         }
                         else
                         {
-                            MessageBox.Show("Current version is newest.");
+                            MessageBox.Show(Resource.CurrentVersionNewest);
                         }
                     }
                 }

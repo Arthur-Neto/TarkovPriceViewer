@@ -136,4 +136,64 @@
   <data name="title" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>title.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="CurrentVersionNewest" xml:space="preserve">
+    <value>Current version is newest.</value>
+  </data>
+  <data name="NewVersionFound" xml:space="preserve">
+    <value>New version ({0}) found. Please download new version. Current Version is {1}</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Damage</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="OverlayInfoBartersNCraft" xml:space="preserve">
+    <value>Barters &amp; Crafts :</value>
+  </data>
+  <data name="OverlayInfoBuyFromTrader" xml:space="preserve">
+    <value>Buy From Trader : {0}</value>
+  </data>
+  <data name="OverlayInfoBuyFromTraderPrice" xml:space="preserve">
+    <value>Buy From Trader Price : {0}</value>
+  </data>
+  <data name="OverlayInfoDayPrice" xml:space="preserve">
+    <value>Day Price : {0}</value>
+  </data>
+  <data name="OverlayInfoLastPrice" xml:space="preserve">
+    <value>Last Price : {0} ({1})</value>
+  </data>
+  <data name="OverlayInfoName" xml:space="preserve">
+    <value>Name : {0}</value>
+  </data>
+  <data name="OverlayInfoNeeds" xml:space="preserve">
+    <value>Needs :</value>
+  </data>
+  <data name="OverlayInfoSellToTrader" xml:space="preserve">
+    <value>Sell to Trader : {0}</value>
+  </data>
+  <data name="OverlayInfoSellToTraderPrice" xml:space="preserve">
+    <value>Sell to Trader Price : {0}</value>
+  </data>
+  <data name="OverlayInfoWeekPrice" xml:space="preserve">
+    <value>Week Price : {0}</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Accuracy" xml:space="preserve">
+    <value>Accuracy</value>
+  </data>
+  <data name="Ergo" xml:space="preserve">
+    <value>Ergo</value>
+  </data>
+  <data name="Flea" xml:space="preserve">
+    <value>Flea</value>
+  </data>
+  <data name="OverlayCompareTxt" xml:space="preserve">
+    <value>{0} Left : {1}</value>
+  </data>
+  <data name="Recoil" xml:space="preserve">
+    <value>Recoil</value>
+  </data>
 </root>

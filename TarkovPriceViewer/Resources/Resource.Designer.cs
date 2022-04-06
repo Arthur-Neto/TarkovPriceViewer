@@ -61,11 +61,74 @@ namespace TarkovPriceViewer.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Accuracy.
+        /// </summary>
+        public static string Accuracy {
+            get {
+                return ResourceManager.GetString("Accuracy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Current version is newest..
+        /// </summary>
+        public static string CurrentVersionNewest {
+            get {
+                return ResourceManager.GetString("CurrentVersionNewest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Damage.
+        /// </summary>
+        public static string Damage {
+            get {
+                return ResourceManager.GetString("Damage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ergo.
+        /// </summary>
+        public static string Ergo {
+            get {
+                return ResourceManager.GetString("Ergo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Flea.
+        /// </summary>
+        public static string Flea {
+            get {
+                return ResourceManager.GetString("Flea", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Loading....
         /// </summary>
         public static string Loading {
             get {
                 return ResourceManager.GetString("Loading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        public static string Name {
+            get {
+                return ResourceManager.GetString("Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New version ({0}) found. Please download new version. Current Version is {1}.
+        /// </summary>
+        public static string NewVersionFound {
+            get {
+                return ResourceManager.GetString("NewVersionFound", resourceCulture);
             }
         }
         
@@ -97,11 +160,119 @@ namespace TarkovPriceViewer.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} Left : {1}.
+        /// </summary>
+        public static string OverlayCompareTxt {
+            get {
+                return ResourceManager.GetString("OverlayCompareTxt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Barters &amp; Crafts :.
+        /// </summary>
+        public static string OverlayInfoBartersNCraft {
+            get {
+                return ResourceManager.GetString("OverlayInfoBartersNCraft", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Buy From Trader : {0}.
+        /// </summary>
+        public static string OverlayInfoBuyFromTrader {
+            get {
+                return ResourceManager.GetString("OverlayInfoBuyFromTrader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Buy From Trader Price : {0}.
+        /// </summary>
+        public static string OverlayInfoBuyFromTraderPrice {
+            get {
+                return ResourceManager.GetString("OverlayInfoBuyFromTraderPrice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Day Price : {0}.
+        /// </summary>
+        public static string OverlayInfoDayPrice {
+            get {
+                return ResourceManager.GetString("OverlayInfoDayPrice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Last Price : {0} ({1}).
+        /// </summary>
+        public static string OverlayInfoLastPrice {
+            get {
+                return ResourceManager.GetString("OverlayInfoLastPrice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name : {0}.
+        /// </summary>
+        public static string OverlayInfoName {
+            get {
+                return ResourceManager.GetString("OverlayInfoName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Needs :.
+        /// </summary>
+        public static string OverlayInfoNeeds {
+            get {
+                return ResourceManager.GetString("OverlayInfoNeeds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sell to Trader : {0}.
+        /// </summary>
+        public static string OverlayInfoSellToTrader {
+            get {
+                return ResourceManager.GetString("OverlayInfoSellToTrader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sell to Trader Price : {0}.
+        /// </summary>
+        public static string OverlayInfoSellToTraderPrice {
+            get {
+                return ResourceManager.GetString("OverlayInfoSellToTraderPrice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Week Price : {0}.
+        /// </summary>
+        public static string OverlayInfoWeekPrice {
+            get {
+                return ResourceManager.GetString("OverlayInfoWeekPrice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please press compare key..
         /// </summary>
         public static string PressCompareKey {
             get {
                 return ResourceManager.GetString("PressCompareKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recoil.
+        /// </summary>
+        public static string Recoil {
+            get {
+                return ResourceManager.GetString("Recoil", resourceCulture);
             }
         }
         
@@ -112,6 +283,15 @@ namespace TarkovPriceViewer.Resources {
             get {
                 object obj = ResourceManager.GetObject("title", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type.
+        /// </summary>
+        public static string Type {
+            get {
+                return ResourceManager.GetString("Type", resourceCulture);
             }
         }
     }
